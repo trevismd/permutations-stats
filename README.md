@@ -1,7 +1,7 @@
 # permutations-stats
 Permutation-based statistical package providing exact tests (for small samples).  
 Accelerated with numba.
-# Status
+## Status
 Brunner Munzel is the only test implemented yet.   
 Exact testing (all permutations) and an approximate method (simulation) are available.
 
@@ -24,6 +24,9 @@ tests/stat_tests.py
 .
 30000 tests with 18 and 19 data points - Permutations-stats: 0.769s, Scipy: 11.468s, diff: 10.699s
 ```
+## Dependencies
+* numpy
+* numba
 
 ## Usage
 ```python
@@ -55,3 +58,9 @@ _, pval = permutation_test(x, y, alternative="greater")
 pval
 # 0.37379679144385025
 ```
+
+## Cite
+If you find this software useful for your work, please cite ...
+
+## References
+> Brunner, E. and Munzel, U. (2000), The Nonparametric Behrens‐Fisher Problem: Asymptotic Theory and a Small‐Sample Approximation. Biom. J., 42: 17-25. doi:10.1002/(SICI)1521-4036(200001)42:1<17::AID-BIMJ17>3.0.CO;2-U
