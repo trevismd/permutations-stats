@@ -35,8 +35,8 @@ def run(n_tests, n_x, n_y):
         time_scp += t3 - t2
 
     print(f"{n_tests} tests with {n_x} and {n_y} data points - "
-          f"Permutations-stats: {time_ps:.3f} s, Scipy: {time_scp:.3f}s, "
-          f"diff: {time_scp - time_ps:.3f}")
+          f"Permutations-stats: {time_ps:.3f}s, Scipy: {time_scp:.3f}s, "
+          f"diff: {time_scp - time_ps:.3f}s")
 
     return np.allclose(ans_ps, ans_scp)
 
