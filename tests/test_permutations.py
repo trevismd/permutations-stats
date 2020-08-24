@@ -27,7 +27,7 @@ def test_approximate_p_val():
     x = rng.random(5)
     y = rng.random(5)
     assert_almost_equal(
-        pm.permutation_test(x, y, method="approximate", n_iter=100)[1],
+        pm.permutation_test(x, y, method="approximate", n_iter=100, seed=100)[1],
         0.96039604)
 
 

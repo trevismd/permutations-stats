@@ -107,10 +107,9 @@ def permutation_test(x: np.array, y: np.array, test="brunner_munzel",
     else:
         n_comb = n_iter
 
-        if seed is None:
-            seed = n_iter
+        if seed is not None:
+            random.seed(seed)
 
-        random.seed(seed)
         perm_ids = [sorted(random.sample(range(n_tot), n_x))
                     for _ in range(n_iter)]
         perm_ids = np.array(perm_ids, dtype=np.int32)
