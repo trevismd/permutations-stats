@@ -1,3 +1,4 @@
+![coverage: 70%](https://img.shields.io/badge/coverage-72%25-yellow)
 # permutations-stats
 Permutation-based statistical package providing exact tests (for small samples).  
 Accelerated with numba.

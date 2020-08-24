@@ -1,8 +1,9 @@
 import warnings
+from time import time
 
 import numpy as np
 from scipy.stats import brunnermunzel
-from time import time
+
 from permutations_stats.tests import brunner_munzel
 
 

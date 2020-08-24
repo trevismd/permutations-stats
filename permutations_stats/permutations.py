@@ -19,6 +19,7 @@ ALTERNATIVES = {"two-sided": 1,
 METHODS = ["exact", "simulation", "approximate"]
 TESTS = tests.TESTS
 
+
 @nb.njit()
 def get_counts(values, perm_ids, w, alt, func):
     res = np.empty(len(perm_ids), dtype=np.float64)
@@ -42,7 +43,7 @@ def get_counts(values, perm_ids, w, alt, func):
 
 def permutation_test(x: np.array, y: np.array, test="brunner_munzel",
                      stat_func=None, alternative="two-sided", method="exact",
-                     n_iter=1e5):
+                     n_iter=1e5, force_simulations=False, seed=None):
 
     global ALTERNATIVES, TESTS
     n_iter = int(n_iter)
@@ -81,26 +82,43 @@ def permutation_test(x: np.array, y: np.array, test="brunner_munzel",
 
     comp_w = abs(w) if alternative == 1 else w  # to be used for comparisons
 
-    n_comb = math.factorial(n_tot) // math.factorial(n_x) // math.factorial(n_y)
+    n_all_comb = math.factorial(n_tot) // math.factorial(n_x) // math.factorial(n_y)
 
-    perm_ids = [perm_x_idx
-                for perm_x_idx in itertools.combinations(range(n_tot), n_x)]
+    if n_iter + 1 >= n_all_comb \
+            and (method == "simulation" or method == "approximate") \
+            and not force_simulations:
 
-    n_all_comb = n_comb
+        print(f"Simulation overridden by exact test because total number of "
+              f"combinations ({n_all_comb}) is smaller than asked amount of "
+              f"simulation iterations ({n_iter}).\n"
+              f"Pass force_simulations=True to avoid this behavior")
 
-    subsample = (method == "simulation" or method == "approximate") \
-        and n_iter < n_all_comb
+        method = "exact"
 
-    if subsample:
+    if method == "exact":
+        n_comb = n_all_comb
+        perm_ids = [perm_x_idx
+                    for perm_x_idx in itertools.combinations(range(n_tot), n_x)]
+        perm_ids = np.array(perm_ids, dtype=np.int32)
+
+        res_greater, res_smaller, res_equal = get_counts(
+            all_values, perm_ids, comp_w, alternative, stat_func)
+
+    else:
         n_comb = n_iter
-        perm_ids = random.sample(perm_ids, n_iter)
 
-    perm_ids = np.array(perm_ids, dtype=np.int32)
+        if seed is None:
+            seed = n_iter
 
-    res_greater, res_smaller, res_equal = get_counts(
-        all_values, perm_ids, comp_w, alternative, stat_func)
+        random.seed(seed)
+        perm_ids = [sorted(random.sample(range(n_tot), n_x))
+                    for _ in range(n_iter)]
+        perm_ids = np.array(perm_ids, dtype=np.int32)
 
-    if subsample:  # Be sure to have at least one possibility
+        res_greater, res_smaller, res_equal = get_counts(
+            all_values, perm_ids, comp_w, alternative, stat_func)
+
+        # Be sure to have at least one possibility
         res_equal += 1
         n_comb += 1
 
@@ -110,4 +128,4 @@ def permutation_test(x: np.array, y: np.array, test="brunner_munzel",
     else:
         pval = (res_greater + res_equal) / n_comb
 
-    return w, pval
+    return w, pval, n_comb

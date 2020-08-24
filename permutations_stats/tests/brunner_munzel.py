@@ -1,11 +1,11 @@
-import numba as nb
 import math
+
+import numba as nb
 import numpy as np
 
 from permutations_stats.utils import rank_array
 
 
-# @nb.njit(nb.float64(nb.float64[:], nb.float64[:]))
 @nb.njit()
 def test(x, y):
     n_x = len(x)
