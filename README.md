@@ -1,4 +1,4 @@
-![coverage: 70%](https://img.shields.io/badge/coverage-72%25-yellow)
+![coverage: 72%](https://img.shields.io/badge/coverage-72%25-yellow)
 # permutations-stats
 Permutation-based statistical package providing exact tests (for small samples).  
 Accelerated with numba.
@@ -41,21 +41,31 @@ y = (np.arange(8) -0.2) * 1.1
 Default parameters are exact Brunner Munzel test (two-sided)
 
 ```python
-stat, pval = permutation_test(x, y, test="brunner_munzel")
-stat, pval
-# (-0.2776044311308564, 0.7475935828877005)
+stat, pval, nb_iter_calc = permutation_test(x, y, test="brunner_munzel")
+stat, pval, nb_iter_calc
+# (-0.2776044311308564, 0.7475935828877005, 24310)
 ```
 
-Simulations are run like this (n_iter has default 100 000 iterations and can be omitted)
+Simulations are run like this (n_iter has default 10 000 iterations and can be omitted)
 ```python
-_, pval = permutation_test(x, y, method="approximate", n_iter=1e4)
-pval
-# 0.7409259074092591
+stat, pval, nb_iter_calc = permutation_test(x, y, method="approximate", n_iter=100)
+stat, pval, nb_iter_calc
+# (-0.2776044311308564, 0.7227722772277227, 101)  # 1 is added to numerator and denominator if simulations
+```
+
+An exact test is run if the number of iterations specified is larger than number of combinations
+```python
+stat, pval, nb_iter_calc = permutation_test(x, y, method="approximate", n_iter=100_000)
+# Simulation overridden by exact test because total number of combinations (24310) is smaller than asked amount of simulation iterations (100000).
+# Pass `force_simulations=True` to avoid this behavior
+
+stat, pval, nb_iter_calc
+# (-0.2776044311308564, 0.7475935828877005, 24310)
 ```
 
 Other alternatives are possible (`"greater"` and `"less"`, default is `"two-sided"`)
 ```python
-_, pval = permutation_test(x, y, alternative="greater")
+_, pval, _ = permutation_test(x, y, alternative="greater")
 pval
 # 0.37379679144385025
 ```

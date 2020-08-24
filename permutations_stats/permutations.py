@@ -43,7 +43,7 @@ def get_counts(values, perm_ids, w, alt, func):
 
 def permutation_test(x: np.array, y: np.array, test="brunner_munzel",
                      stat_func=None, alternative="two-sided", method="exact",
-                     n_iter=1e5, force_simulations=False, seed=None):
+                     n_iter=1e4, force_simulations=False, seed=None):
 
     global ALTERNATIVES, TESTS
     n_iter = int(n_iter)
@@ -91,7 +91,7 @@ def permutation_test(x: np.array, y: np.array, test="brunner_munzel",
         print(f"Simulation overridden by exact test because total number of "
               f"combinations ({n_all_comb}) is smaller than asked amount of "
               f"simulation iterations ({n_iter}).\n"
-              f"Pass force_simulations=True to avoid this behavior")
+              f"Pass `force_simulations=True` to avoid this behavior")
 
         method = "exact"
 
