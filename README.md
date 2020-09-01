@@ -1,4 +1,4 @@
-![coverage: 72%](https://img.shields.io/badge/coverage-72%25-yellow)
+![coverage](.github/coverage.svg)
 # permutations-stats
 Permutation-based statistical package providing exact tests (for small samples).  
 Accelerated with numba.
@@ -57,7 +57,7 @@ stat, pval, nb_iter_calc
 An exact test is run if the number of iterations specified is larger than number of combinations
 ```python
 stat, pval, nb_iter_calc = permutation_test(x, y, method="approximate", n_iter=100_000)
-# Simulation overridden by exact test because total number of combinations (24310) 
+# Simulation overridden by exact test because total number of combinations (24310)
 # is smaller than asked amount of simulation iterations (100000).
 # Pass `force_simulations=True` to avoid this behavior
 
@@ -76,6 +76,6 @@ pval
 If you find this software useful for your work, please cite ...
 
 ## References
-> Brunner, E. and Munzel, U. (2000), The Nonparametric Behrens‐Fisher Problem: 
-> Asymptotic Theory and a Small‐Sample Approximation. Biom. J., 42: 17-25. 
+> Brunner, E. and Munzel, U. (2000), The Nonparametric Behrens‐Fisher Problem:
+> Asymptotic Theory and a Small‐Sample Approximation. Biom. J., 42: 17-25.
 > doi:10.1002/(SICI)1521-4036(200001)42:1<17::AID-BIMJ17>3.0.CO;2-U
