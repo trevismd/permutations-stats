@@ -100,7 +100,3 @@ def np_mean(array, axis):
 @nb.njit
 def np_std(array, axis):
     return np_apply_along_axis(np.std, axis, array)
-
-@nb.njit
-def np_unique(array, axis):
-    return np_apply_along_axis(np.unique, axis, array)
