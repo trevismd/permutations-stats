@@ -3,7 +3,7 @@ import math
 import numba as nb
 import numpy as np
 
-from permutations_stats.utils import rank_array
+from permutations_stats.utils import rank_1d
 
 
 @nb.njit()
@@ -12,10 +12,10 @@ def test(x, y):
     n_y = len(y)
     n_tot = n_x + n_y
 
-    o_r_x = rank_array(x)
-    o_r_y = rank_array(y)
+    o_r_x = rank_1d(x)
+    o_r_y = rank_1d(y)
 
-    n_ranks = rank_array(np.concatenate((x, y)))
+    n_ranks = rank_1d(np.concatenate((x, y)))
 
     n_r_x = n_ranks[:n_x]
     n_r_y = n_ranks[n_x:]

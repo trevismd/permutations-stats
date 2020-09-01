@@ -14,11 +14,39 @@ def is_close(x, y):
         return x_fin == y_fin
 
 
-# @nb.njit(nb.float64[:](nb.float64[:]))
 @nb.njit()
-def rank_array(array):
+def rank_2d(array):
+    """ Ranks all values of a 2d array, averaging ties.
+    :param array: 2d numpy array
+    :returns: array whose values are replaced by their rank
+    """
+    n_array = array.flatten()
+    ranked = rank_1d(n_array)
+
+    return ranked.reshape(array.shape)
+
+
+@nb.njit()
+def rank_2d_by_col(array):
+    """ Ranks all columns of a 2d array, averaging ties.
+    :param array: 2d numpy array
+    :returns: array whose values are replaced by their rank by column
+    """
+    n_arrays = array.shape[1]
+    result = np.empty_like(array)
+    for array_idx in range(n_arrays):
+        result[:, array_idx] = rank_1d(array[:,array_idx])
+    return result
+
+
+@nb.njit()
+def rank_1d(array):
     # Thanks Sven Mamach - https://stackoverflow.com/a/5284703
     # and Martin F Thomsen - https://stackoverflow.com/a/20455974
+    """ Rank a 1d array, with averages of ties.
+    :param array: 1d numpy array
+    :returns: array whose values are replaced by their rank
+    """
     temp = array.argsort()
     ranks = np.empty_like(temp, dtype=np.float64)
     ranks[temp] = np.arange(len(array), dtype=np.float64)
