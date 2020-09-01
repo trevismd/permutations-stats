@@ -73,3 +73,34 @@ def rank_1d(array):
         to_check[same] = False
 
     return ranks + 1
+
+
+# This section is adapted from @joelrich
+# https://github.com/numba/numba/issues/1269#issuecomment-472574352
+@nb.njit
+def np_apply_along_axis(func1d, axis, arr):
+  assert arr.ndim == 2
+  assert axis in [0, 1]
+  if axis == 0:
+    result = np.empty(arr.shape[1])
+    for i in range(len(result)):
+      result[i] = func1d(arr[:, i])
+  else:
+    result = np.empty(arr.shape[0])
+    for i in range(len(result)):
+      result[i] = func1d(arr[i, :])
+  return result
+
+
+@nb.njit
+def np_mean(array, axis):
+    return np_apply_along_axis(np.mean, axis, array)
+
+
+@nb.njit
+def np_std(array, axis):
+    return np_apply_along_axis(np.std, axis, array)
+
+@nb.njit
+def np_unique(array, axis):
+    return np_apply_along_axis(np.unique, axis, array)
