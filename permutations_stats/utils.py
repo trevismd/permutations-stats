@@ -40,6 +40,15 @@ def rank_2d_by_col(array):
 
 
 @nb.njit()
+def rank_2d_by_row(array):
+    """ Ranks rows of a 2d array, averaging ties.
+    :param array: 2d numpy array
+    :returns: array whose values are replaced by their rank by row
+    """
+    return rank_2d_by_col(array.T).T
+
+
+@nb.njit()
 def rank_1d(array):
     # Thanks Sven Mamach - https://stackoverflow.com/a/5284703
     # and Martin F Thomsen - https://stackoverflow.com/a/20455974
