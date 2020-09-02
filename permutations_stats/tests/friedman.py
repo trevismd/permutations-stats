@@ -35,6 +35,7 @@ def test(array: np.ndarray):
         ties = False
 
     if ties:
+        print("Conover correction for ties applied")
         a1 = np.sum(np.square(ranked_data))
         c1 = 0.25 * n_subjects * n_treatments * (n_treatments + 1) ** 2
         Q *= (n_treatments - 1) / (a1 - c1)

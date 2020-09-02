@@ -1,13 +1,11 @@
 ![coverage](.github/coverage.svg)
 # permutations-stats
-Permutation-based statistical package providing exact tests (for small samples).  
-Accelerated with numba.
+Python only permutation-based statistical tests, accelerated with numba.
 ## Status
-Brunner Munzel is the only test implemented yet.   
-Exact testing (all permutations) and an approximate method (simulation) are available.
+Brunner Munzel and Friedman tests (repeated measures) are implemented at the moment.   
+Exact testing (all permutations) and approximate method (simulation) are available.
 
-In the current implementation, a few seconds are
-required to compile on the fly.
+In the current implementation, a few seconds are required to compile on the fly.
 Then, acceleration is critical as shown in this output from tests comparing the
 statistic calculation with scipy:
 
@@ -28,6 +26,9 @@ tests/stat_tests.py
 ## Dependencies
 * numpy
 * numba
+
+And for testing only
+* scipy
 
 ## Usage
 ```python
@@ -79,3 +80,7 @@ If you find this software useful for your work, please cite ...
 > Brunner, E. and Munzel, U. (2000), The Nonparametric Behrens‐Fisher Problem:
 > Asymptotic Theory and a Small‐Sample Approximation. Biom. J., 42: 17-25.
 > doi:10.1002/(SICI)1521-4036(200001)42:1<17::AID-BIMJ17>3.0.CO;2-U
+
+> Friedman, M. (1937). "The Use of Ranks to Avoid the Assumption of
+> Normality Implicit in the Analysis of Variance."
+> Journal of the American Statistical Association 32(200): 675-701.
