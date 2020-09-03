@@ -1,4 +1,4 @@
-![coverage](.github/output.svg)
+![coverage](.github/coverage.svg)
 # permutations-stats
 Permutation-based statistical package providing exact tests (for small samples).  
 Accelerated with numba.
