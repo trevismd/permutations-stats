@@ -1,5 +1,17 @@
 import numba as nb
 import numpy as np
+from enum import Enum
+
+
+class Alternative(Enum):
+    TWO_SIDED = 1
+    GREATER = 2
+    LESS = 3
+
+
+class Method(Enum):
+    exact = 1
+    simulation = 2
 
 
 @nb.vectorize([nb.b1(nb.float64, nb.float64)])
@@ -79,17 +91,24 @@ def rank_1d(array):
 # https://github.com/numba/numba/issues/1269#issuecomment-472574352
 @nb.njit
 def np_apply_along_axis(func1d, axis, arr):
-  assert arr.ndim == 2
-  assert axis in [0, 1]
-  if axis == 0:
-    result = np.empty(arr.shape[1])
-    for i in range(len(result)):
-      result[i] = func1d(arr[:, i])
-  else:
-    result = np.empty(arr.shape[0])
-    for i in range(len(result)):
-      result[i] = func1d(arr[i, :])
-  return result
+
+    if arr.ndim != 2:
+        raise NotImplementedError("This function applies to 2d arrays")
+
+    if axis == 0:
+        result = np.empty(arr.shape[1])
+        for i in range(len(result)):
+            result[i] = func1d(arr[:, i])
+
+    elif axis == 1:
+        result = np.empty(arr.shape[0])
+        for i in range(len(result)):
+            result[i] = func1d(arr[i, :])
+
+    else:
+        raise ValueError("Axis must be 0 or 1")
+
+    return result
 
 
 @nb.njit

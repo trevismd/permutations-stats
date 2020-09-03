@@ -7,7 +7,15 @@ from permutations_stats.utils import rank_1d
 
 
 @nb.njit()
-def test(x, y):
+def test(x: np.ndarray, y: np.ndarray):
+    # noinspection PyBroadException
+    try:
+        if len(x.shape) != 1 or len(y.shape) != 1:
+            raise TypeError("Input should be 1D arrays.")
+
+    except:
+        raise TypeError("Please provide a numeric-valued 1D numpy arrays for x and y.")
+
     n_x = len(x)
     n_y = len(y)
     n_tot = n_x + n_y

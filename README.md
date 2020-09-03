@@ -27,8 +27,8 @@ tests/stat_tests.py
 * numpy
 * numba
 
-And for testing only
-* scipy
+And for development testing only
+* scipy, pytest
 
 ## Usage
 ```python

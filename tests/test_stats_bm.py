@@ -1,7 +1,11 @@
 import warnings
 from time import time
 
+import numba as nb
 import numpy as np
+# noinspection PyPackageRequirements
+import pytest
+# noinspection PyPackageRequirements
 from scipy.stats import brunnermunzel
 
 from permutations_stats.tests import brunner_munzel
@@ -88,3 +92,25 @@ def test_30000_18_19groups():
     n_tests = 30_000
 
     assert run(n_tests, n_x, n_y)
+
+
+def test_input_not2d():
+    rng = np.random.default_rng()
+    x = rng.random((5, 5))
+    y = rng.random((5, 5))
+
+    with pytest.raises(TypeError):
+        brunner_munzel.test(np.array([x, y], y))
+
+
+# noinspection PyTypeChecker
+def test_input_not_numeric_array():
+
+    rng = np.random.default_rng()
+    x = rng.random((5, 5))
+
+    with pytest.raises((TypeError, nb.TypingError)):
+        brunner_munzel.test("this", x)
+
+    with pytest.raises((TypeError, nb.TypingError)):
+        brunner_munzel.test(x, "this")
