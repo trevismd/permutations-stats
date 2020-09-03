@@ -1,47 +1,97 @@
 import numpy as np
-import random
 import numba as nb
 
 
-@nb.njit()
-def bootstrap_mean(values, alpha, n_iter, seed: int = 0):
+@nb.njit(parallel=True)
+def bootstrap_mean(values, width=95, n_iter=1000, seed: int = 0):
+    """
+    Resamples with replacement to provide a confidence interval for the mean.
+    np.mean and np.percentiles are used with default parameters.
+    :param values: 1D array
+    :param width: Width of confidence interval (symmetric).
+        Default is 95 for 95% CI
+    :param n_iter: Number of iterations to perform. Default is 1000.
+    :param seed: Seed for the random sampling, to provide reproducible results.
+    :return: mean of sample, lower bound, upper bound.
+    """
     n_items = values.shape[0]
     results = np.empty(n_iter, dtype=np.float64)
 
-    if seed > 0:
-        random.seed(seed)
+    if seed != 0:
+        np.random.seed(seed)
 
     for iter_idx in range(n_iter):
-        results[iter_idx] = np.mean(values.take(list(
-            [random.randrange(n_items) for _ in range(n_items)])))
+        results[iter_idx] = np.mean(
+            values.take(np.random.randint(0, n_items, n_items)))
 
     res = np.mean(values)
 
-    return shape_results(res, results, alpha)
+    return _shape_results(res, results, width)
 
 
-@nb.njit()
-def bootstrap_median(values, alpha, n_iter, seed: int = 0):
+@nb.njit(parallel=True)
+def bootstrap_median(values, width=95, n_iter=1000, seed: int = 0):
+    """
+    Resamples with replacement to provide a confidence interval for the median.
+    np.median and np.percentiles are used with default parameters.
+
+    :param values: 1D array
+    :param width: Width of confidence interval (symmetric).
+        Default is 95 for 95% CI
+    :param n_iter: Number of iterations to perform. Default is 1000.
+    :param seed: Seed for the random sampling, to provide reproducible results.
+    :return: median of sample, lower bound, upper bound.
+    """
+
     n_items = values.shape[0]
     results = np.empty(n_iter, dtype=np.float64)
 
-    if seed > 0:
-        random.seed(seed)
+    if seed != 0:
+        np.random.seed(seed)
 
     for iter_idx in range(n_iter):
-        results[iter_idx] = np.median(values.take(list(
-            [random.randrange(n_items) for _ in range(n_items)])))
+        results[iter_idx] = np.median(
+            values.take(np.random.randint(0, n_items, n_items)))
 
     res = np.median(values)
 
-    return shape_results(res, results, alpha)
+    return _shape_results(res, results, width)
+
+
+@nb.njit(parallel=True)
+def bootstrap_std(values, width=95, n_iter=1000, seed: int = 0):
+    """
+    Resamples with replacement to provide a confidence interval for the standard
+    deviation.
+    np.std and np.percentiles are used with default parameters.
+
+    :param values: 1D array
+    :param width: Width of confidence interval (symmetric).
+        Default is 95 for 95% CI
+    :param n_iter: Number of iterations to perform. Default is 1000.
+    :param seed: Seed for the random sampling, to provide reproducible results.
+    :return: standard deviation of sample, lower bound, upper bound.
+    """
+    n_items = values.shape[0]
+    results = np.empty(n_iter, dtype=np.float64)
+
+    if seed != 0:
+        np.random.seed(seed)
+
+    for iter_idx in range(n_iter):
+        results[iter_idx] = np.std(
+            values.take(np.random.randint(0, n_items, n_items)))
+
+    res = np.std(values)
+
+    return _shape_results(res, results, width)
 
 
 @nb.njit()
-def shape_results(res, results, alpha):
+def _shape_results(res, results, width):
     ordered_results = np.sort(results)
 
-    lower = np.percentile(ordered_results, 100 * alpha / 2)
-    upper = np.percentile(ordered_results, 100 - (100 * alpha / 2))
+    lower = np.percentile(ordered_results, (100 - width) / 2)
+    upper = np.percentile(ordered_results, (100 + width) / 2)
 
     return res, lower, upper

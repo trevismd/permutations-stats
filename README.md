@@ -2,12 +2,29 @@
 # permutations-stats
 Python only permutation-based statistical tests, accelerated with numba.
 ## Status
-Brunner Munzel and Friedman tests (repeated measures) are implemented at the moment.   
+### Statistical tests
+Brunner Munzel [1] and Friedman [2] tests (repeated measures) are implemented.
+
 Exact testing (all permutations) and approximate method (simulation) are available.
 
-In the current implementation, a few seconds are required to compile on the fly.
+Two functions for bootstrapping-based confidence intervals calculations for 
+mean and median are also implemented (not documented yet).
+
+## Why this package ?
+This work aims to provide fast permutation-based statistical tests in Python.
+Some tests are not available publicly in an exact mode (computing all 
+possible permutations) or with simulations. So if certain assumptions cannot be 
+made about the data (such as normality or a sufficiently large sample), these 
+implementations shouldn't be used.
+For example, the Brunner Munzel [1] test is implemented in scipy but not with 
+an exact calculation. The statistic can be used with the public API but it can 
+take some time ran thousands of times (the p-value is also calculated for each 
+iteration).  
+
+This packages reimplements the looping of permutations and statistical tests 
+with numba. With numba a few seconds are required to compile on the fly.  
 Then, acceleration is critical as shown in this output from tests comparing the
-statistic calculation with scipy:
+Brunner Munzel statistic calculation with scipy:
 
 ```
 tests/stat_tests.py
@@ -23,6 +40,10 @@ tests/stat_tests.py
 .
 30000 tests with 18 and 19 data points - Permutations-stats: 0.769s, Scipy: 11.468s, diff: 10.699s
 ```
+
+Scipy is working on numba implementation too, but these functions are not 
+available at the moment.
+
 ## Dependencies
 * numpy
 * numba
@@ -31,6 +52,7 @@ And for development testing only
 * scipy, pytest
 
 ## Usage
+Basically,
 ```python
 import numpy as np
 from permutations_stats.permutations import permutation_test
@@ -47,40 +69,19 @@ stat, pval, nb_iter_calc
 # (-0.2776044311308564, 0.7475935828877005, 24310)
 ```
 
-Simulations are run like this (n_iter has default 10 000 iterations and can be omitted)
-NB: # 1 is added to numerator and denominator of pvalue calculation if simulations are run
-```python
-stat, pval, nb_iter_calc = permutation_test(x, y, method="approximate", n_iter=100)
-stat, pval, nb_iter_calc
-# (-0.2776044311308564, 0.7227722772277227, 101)  
-```
+More on [usage.md](usage.md)
 
-An exact test is run if the number of iterations specified is larger than number of combinations
-```python
-stat, pval, nb_iter_calc = permutation_test(x, y, method="approximate", n_iter=100_000)
-# Simulation overridden by exact test because total number of combinations (24310)
-# is smaller than asked amount of simulation iterations (100000).
-# Pass `force_simulations=True` to avoid this behavior
-
-stat, pval, nb_iter_calc
-# (-0.2776044311308564, 0.7475935828877005, 24310)
-```
-
-Other alternatives are possible (`"greater"` and `"less"`, default is `"two-sided"`)
-```python
-_, pval, _ = permutation_test(x, y, alternative="greater")
-pval
-# 0.37379679144385025
-```
+## Perspective 
+Support for Wilcoxon's statistic should come soon.
 
 ## Cite
-If you find this software useful for your work, please cite ...
+If you find this software useful for your work, please cite ... TBD.
 
 ## References
-> Brunner, E. and Munzel, U. (2000), The Nonparametric Behrens‐Fisher Problem:
+> [1] Brunner, E. and Munzel, U. (2000), The Nonparametric Behrens‐Fisher Problem:
 > Asymptotic Theory and a Small‐Sample Approximation. Biom. J., 42: 17-25.
 > doi:10.1002/(SICI)1521-4036(200001)42:1<17::AID-BIMJ17>3.0.CO;2-U
 
-> Friedman, M. (1937). "The Use of Ranks to Avoid the Assumption of
+> [2] Friedman, M. (1937). "The Use of Ranks to Avoid the Assumption of
 > Normality Implicit in the Analysis of Variance."
 > Journal of the American Statistical Association 32(200): 675-701.
