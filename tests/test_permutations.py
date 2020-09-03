@@ -38,3 +38,11 @@ def test_correct_alternative():
 
     with pytest.raises(ValueError):
         pm.permutation_test(x, y, alternative="this")
+
+
+def test_counts():
+    array = np.array([1, 2, 3, 4])
+    res_greater, res_smaller, res_equal = pm.counts(array, 2)
+    assert_equal(res_greater, 2)
+    assert_equal(res_equal, 1)
+    assert_equal(res_smaller, 1)

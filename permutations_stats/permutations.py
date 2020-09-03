@@ -21,6 +21,16 @@ TESTS = tests.TESTS
 
 
 @nb.njit()
+def counts(res, w):
+    close = is_close(res, w)
+    res_equal = np.sum(close)
+    res_greater = np.sum(res[~close] > w)
+    res_smaller = np.sum(res[~close] < w)
+
+    return res_greater, res_smaller, res_equal
+
+
+@nb.njit()
 def get_counts(values, perm_ids, w, alternative, func):
     res = np.empty(len(perm_ids), dtype=np.float64)
 
@@ -32,13 +42,7 @@ def get_counts(values, perm_ids, w, alternative, func):
     if alternative == 1:
         res = np.abs(res)
 
-    close = is_close(res, w)
-
-    res_equal = np.sum(close)
-    res_greater = np.sum(res[~close] > w)
-    res_smaller = np.sum(res[~close] < w)
-
-    return res_greater, res_smaller, res_equal
+    return counts(res, w)
 
 
 @nb.njit()
@@ -51,7 +55,6 @@ def get_counts_repeated(array, treatment_perms_ids, subj_perms_ids, w,
 
         new_array = np.empty_like(array)
         for row_idx in range(n_subjects):
-            # to_take =
             new_array[row_idx, :] = array[row_idx].take(
                 treatment_perms_ids[perm_x_idx[row_idx]])
 
@@ -60,13 +63,7 @@ def get_counts_repeated(array, treatment_perms_ids, subj_perms_ids, w,
     if alternative == 1:
         res = np.abs(res)
 
-    close = is_close(res, w)
-
-    res_equal = np.sum(close)
-    res_greater = np.sum(res[~close] > w)
-    res_smaller = np.sum(res[~close] < w)
-
-    return res_greater, res_smaller, res_equal
+    return counts(res, w)
 
 
 def check_method(n_iter, n_all_comb, method, force_simulations):
@@ -140,6 +137,7 @@ def repeated_permutation_test(x: np.array, test="friedman",
 
     return w, pval, n_comb
 
+
 def check_and_get(test, alternative, stat_func, method):
     global ALTERNATIVES, TESTS
 
@@ -161,6 +159,7 @@ def check_and_get(test, alternative, stat_func, method):
                          f"must be in {METHODS}")
 
     return alternative, stat_func, method
+
 
 def permutation_test(x: np.array, y: np.array, test="brunner_munzel",
                      stat_func=None, alternative="two-sided", method="exact",
