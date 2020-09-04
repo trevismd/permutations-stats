@@ -1,8 +1,13 @@
 from setuptools import setup
 
+about = {}
+with open("permutations_stats/__about__.py") as fp:
+    exec(fp.read(), about)
+version = about['__version__']
+
 setup(
     name='permutations-stats',
-    version='0.1.3-alpha',
+    version=version,
     package_dirs={
         'permutations_stats': 'permutations_stats',
         'permutations_stats.tests': 'permutations_stats/tests'

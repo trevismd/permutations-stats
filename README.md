@@ -3,25 +3,26 @@
 Python only permutation-based statistical tests, accelerated with numba.
 ## Status
 ### Statistical tests
-Brunner Munzel [1] and Friedman [2] tests (repeated measures) are implemented.
+Brunner Munzel [1], Mann Whitney Wilcoxon [2, 3] and Friedman [4] tests are
+implemented.
 
 Exact testing (all permutations) and approximate method (simulation) are available.
 
-Two functions for bootstrapping-based confidence intervals calculations for 
+Two functions for bootstrapping-based confidence intervals calculations for
 mean and median are also implemented (not documented yet).
 
 ## Why this package ?
 This work aims to provide fast permutation-based statistical tests in Python.
-Some tests are not available publicly in an exact mode (computing all 
-possible permutations) or with simulations. So if certain assumptions cannot be 
-made about the data (such as normality or a sufficiently large sample), these 
+Some tests are not available publicly in an exact mode (computing all
+possible permutations) or with simulations. So if certain assumptions cannot be
+made about the data (such as normality or a sufficiently large sample), these
 implementations shouldn't be used.
-For example, the Brunner Munzel [1] test is implemented in scipy but not with 
-an exact calculation. The statistic can be used with the public API but it can 
-take some time ran thousands of times (the p-value is also calculated for each 
+For example, the Brunner Munzel [1] test is implemented in scipy but not with
+an exact calculation. The statistic can be used with the public API but it can
+take some time ran thousands of times (the p-value is also calculated for each
 iteration).  
 
-This packages reimplements the looping of permutations and statistical tests 
+This packages reimplements the looping of permutations and statistical tests
 with numba. With numba a few seconds are required to compile on the fly.  
 Then, acceleration is critical as shown in this output from tests comparing the
 Brunner Munzel statistic calculation with scipy:
@@ -41,7 +42,7 @@ tests/stat_tests.py
 30000 tests with 18 and 19 data points - Permutations-stats: 0.769s, Scipy: 11.468s, diff: 10.699s
 ```
 
-Scipy is working on numba implementation too, but these functions are not 
+Scipy is working on numba implementation too, but these functions are not
 available at the moment.
 
 ## Dependencies
@@ -71,17 +72,28 @@ stat, pval, nb_iter_calc
 
 More on [usage.md](usage.md)
 
-## Perspective 
-Support for Wilcoxon's statistic should come soon.
+## Perspective
+* Wilcoxon's statistic W
+* If sample sizes are and/or the number of iterations are small, acceleration is
+not expected with Numba and numpy alone could be the fastest option. Thresholds
+for numba use will be better determined to decide the function to call
+(without user intervention).
 
 ## Cite
 If you find this software useful for your work, please cite ... TBD.
 
 ## References
-> [1] Brunner, E. and Munzel, U. (2000), The Nonparametric Behrens‐Fisher Problem:
-> Asymptotic Theory and a Small‐Sample Approximation. Biom. J., 42: 17-25.
-> doi:10.1002/(SICI)1521-4036(200001)42:1<17::AID-BIMJ17>3.0.CO;2-U
+> [1] Brunner, E. and Munzel, U. (2000), The Nonparametric Behrens‐Fisher
+> Problem: Asymptotic Theory and a Small‐Sample Approximation. Biom. J., 42:
+> 17-25. doi:10.1002/(SICI)1521-4036(200001)42:1<17::AID-BIMJ17>3.0.CO;2-U
 
-> [2] Friedman, M. (1937). "The Use of Ranks to Avoid the Assumption of
+> [2] Mann, H. B. and D. R. Whitney (1947). "On a Test of Whether one of Two
+> Random Variables is Stochastically Larger than the Other." Ann. Math. Statist.
+> 18(1): 50-60.
+
+> [3] Wilcoxon, F. (1945). "Individual Comparisons by Ranking Methods."
+> Biometrics Bulletin 1(6): 80-83.
+
+> [4] Friedman, M. (1937). "The Use of Ranks to Avoid the Assumption of
 > Normality Implicit in the Analysis of Variance."
 > Journal of the American Statistical Association 32(200): 675-701.
