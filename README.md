@@ -8,8 +8,8 @@ implemented.
 
 Exact testing (all permutations) and approximate method (simulation) are available.
 
-Two functions for bootstrapping-based confidence intervals calculations for
-mean and median are also implemented (not documented yet).
+Functions for bootstrapping-based confidence intervals calculations for
+mean, median and std are also implemented (not documented yet).
 
 ## Why this package ?
 This work aims to provide fast permutation-based statistical tests in Python.
