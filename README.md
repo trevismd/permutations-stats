@@ -15,8 +15,8 @@ mean, median and std are also implemented (not documented yet).
 This work aims to provide fast permutation-based statistical tests in Python.
 Some tests are not available publicly in an exact mode (computing all
 possible permutations) or with simulations. So if certain assumptions cannot be
-made about the data (such as normality or a sufficiently large sample), these
-implementations shouldn't be used.
+made about the data (such as normality or a sufficiently large sample), the
+existing implementations shouldn't be used.  
 For example, the Brunner Munzel [1] test is implemented in scipy but not with
 an exact calculation. The statistic can be used with the public API but it can
 take some time ran thousands of times (the p-value is also calculated for each
