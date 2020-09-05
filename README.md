@@ -6,26 +6,26 @@ Python only permutation-based statistical tests, accelerated with numba.
 Brunner Munzel [1], Mann Whitney Wilcoxon [2, 3] and Friedman [4] tests are
 implemented.
 
-Exact testing (all permutations) and approximate method (simulation) are available.
+Exact tests (all combinations) and approximate method (simulation) are available.
 
 Functions for bootstrapping-based confidence intervals calculations for
-mean, median and std are also implemented (not documented yet).
+mean, median and standard deviation are also implemented (not documented yet).
 
 ## Why this package ?
 This work aims to provide fast permutation-based statistical tests in Python.
 Some tests are not available publicly in an exact mode (computing all
-possible permutations) or with simulations. So if certain assumptions cannot be
-made about the data (such as normality or a sufficiently large sample), the
-existing implementations shouldn't be used.  
-For example, the Brunner Munzel [1] test is implemented in scipy but not with
+possible permutations) or with simulations. If certain assumptions cannot be
+made about the data (such as normality) or if the sample is not large enough, the
+existing implementations should not be used.  
+For example, the Brunner Munzel [1] test is implemented in `scipy` but not with
 an exact calculation. The statistic can be used with the public API but it can
-take some time ran thousands of times (the p-value is also calculated for each
+take some time if ran several thousands of times (e.g. the p-value is also calculated for each
 iteration).  
 
 This packages reimplements the looping of permutations and statistical tests
-with numba. With numba a few seconds are required to compile on the fly.  
+with `numba`. A few seconds are required to compile on the fly for the first function call.  
 Then, acceleration is critical as shown in this output from tests comparing the
-Brunner Munzel statistic calculation with scipy:
+Brunner Munzel statistic calculation with `scipy`:
 
 ```
 tests/stat_tests.py
@@ -42,18 +42,16 @@ tests/stat_tests.py
 30000 tests with 18 and 19 data points - Permutations-stats: 0.769s, Scipy: 11.468s, diff: 10.699s
 ```
 
-Scipy is working on numba implementation too, but these functions are not
-available at the moment.
-
 ## Dependencies
-* numpy
-* numba
+* [numpy](https://www.numpy.org/)
+* [numba](https://numba.pydata.org/)
 
 And for development testing only
-* scipy, pytest
+* [scipy](https://www.scipy.org/)
+* [pytest](https://www.pytest.org/)
 
 ## Usage
-Basically,
+Basic usage: 
 ```python
 import numpy as np
 from permutations_stats.permutations import permutation_test
@@ -74,13 +72,16 @@ More on [usage.md](usage.md)
 
 ## Perspective
 * Wilcoxon's statistic W
-* If sample sizes are and/or the number of iterations are small, acceleration is
-not expected with Numba and numpy alone could be the fastest option. Thresholds
-for numba use will be better determined to decide the function to call
+* If sample sizes and/or the number of iterations are small, acceleration is
+not expected with `numba`, and using `numpy` alone should be the fastest option.  
+Thresholds for `numba` use will be better determined to decide the function to call
 (without user intervention).
 
+## License
+GPL v.3 no later version.
+
 ## Cite
-If you find this software useful for your work, please cite ... TBD.
+If you find this software useful for your academic work, please cite ... TBD.
 
 ## References
 > [1] Brunner, E. and Munzel, U. (2000), The Nonparametric Behrens‐Fisher
