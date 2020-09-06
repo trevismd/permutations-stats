@@ -3,8 +3,8 @@
 Python only permutation-based statistical tests, accelerated with numba.
 ## Status
 ### Statistical tests
-Brunner Munzel [1], Mann Whitney Wilcoxon [2, 3] and Friedman [4] tests are
-implemented.
+Brunner Munzel [1], Mann Whitney Wilcoxon [2, 3], Wilcoxon signed rank test [3],
+and Friedman [4] tests are implemented.
 
 Exact tests (all combinations) and approximate method (simulation) are available.
 
@@ -51,7 +51,7 @@ And for development testing only
 * [pytest](https://www.pytest.org/)
 
 ## Usage
-Basic usage: 
+Basic usage:
 ```python
 import numpy as np
 from permutations_stats.permutations import permutation_test
@@ -71,7 +71,6 @@ stat, pval, nb_iter_calc
 More on [usage.md](usage.md)
 
 ## Perspective
-* Wilcoxon's statistic W
 * If sample sizes and/or the number of iterations are small, acceleration is
 not expected with `numba`, and using `numpy` alone should be the fastest option.  
 Thresholds for `numba` use will be better determined to decide the function to call
@@ -98,3 +97,6 @@ If you find this software useful for your academic work, please cite ... TBD.
 > [4] Friedman, M. (1937). "The Use of Ranks to Avoid the Assumption of
 > Normality Implicit in the Analysis of Variance."
 > Journal of the American Statistical Association 32(200): 675-701.
+
+
+git commit -m "Fix repeated permutations, add wilcoxon"

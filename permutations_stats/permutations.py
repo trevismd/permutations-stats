@@ -105,7 +105,7 @@ def repeated_permutation_test(x: np.array, test="friedman",
     w = stat_func(x)
     comp_w = abs(w) if alternative == pmu.Alternative.TWO_SIDED else w  # to be used for comparisons
 
-    n_all_comb = math.factorial(n_subjects) * math.factorial(n_treatments)
+    n_all_comb = math.factorial(n_treatments) ** n_subjects
     method = _check_method(n_iter, n_all_comb, method, force_simulations)
     treatment_perms_ids = [perm_x_idx
                            for perm_x_idx
@@ -117,8 +117,9 @@ def repeated_permutation_test(x: np.array, test="friedman",
         n_comb = n_all_comb
         subj_perms_ids = [perm_x_idx
                           for perm_x_idx
-                          in itertools.combinations_with_replacement(
-                              range(len(treatment_perms_ids)), n_subjects)]
+                          in itertools.product(
+                              range(len(treatment_perms_ids)),
+                              repeat=n_subjects)]
         subj_perms_ids = np.array(subj_perms_ids, dtype=np.int32)
 
         res_greater, res_smaller, res_equal = _get_counts_repeated(

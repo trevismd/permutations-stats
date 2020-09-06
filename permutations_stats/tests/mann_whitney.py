@@ -22,7 +22,7 @@ def test(x: np.ndarray, y: np.ndarray):
     ranks = rank_1d(np.concatenate((x, y)))
     rank_sum_x = np.sum(ranks[:n_x])
 
-    u = rank_sum_x - n_x * (n_x + 1) / 2
+    u = rank_sum_x - n_x * (n_x + 1) / 2.0
     u = min(u, n_x * n_y - u)
 
     return u

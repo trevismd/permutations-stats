@@ -4,6 +4,7 @@ from time import time
 
 import numba as nb
 import numpy as np
+from numpy.testing import assert_allclose
 # noinspection PyPackageRequirements
 import pytest
 # noinspection PyPackageRequirements
@@ -49,27 +50,22 @@ class Test:
 
             time_ps += t1 - t0
             time_scp += t3 - t2
+            assert_allclose(ans_ps, ans_scp)
 
         print(f"{n_tests} tests with {n_x} and {n_y} data points - "
               f"Permutations-stats: {time_ps:.3f}s, Scipy: {time_scp:.3f}s, "
               f"diff: {time_scp - time_ps:.3f}s")
-        comparison = np.allclose(ans_ps, ans_scp)
-
-        if comparison:
-            with open("speeds.csv", 'a') as speeds_file:
-                speeds_file.write(f"{self.version};BM;{test_id};"
-                                  f"{self.ps_label};{time_ps};SCP;{time_scp};"
-                                  f"{time_scp - time_ps}\n")
-
-        return np.allclose(ans_ps, ans_scp)
-
+        with open("speeds.csv", 'a') as speeds_file:
+            speeds_file.write(f"{self.version};BM;{test_id};"
+                              f"{self.ps_label};{time_ps};SCP;{time_scp};"
+                              f"{time_scp - time_ps}\n")
 
     def test_100_5_4groups(self):
         n_x = 5
         n_y = 4
         n_tests = 200
 
-        assert self.run(1, n_tests, n_x, n_y)
+        self.run(1, n_tests, n_x, n_y)
 
 
     def test_100_3_3groups(self):
@@ -77,7 +73,7 @@ class Test:
         n_y = 3
         n_tests = 200
 
-        assert self.run(2, n_tests, n_x, n_y)
+        self.run(2, n_tests, n_x, n_y)
 
 
     def test_20_10_12groups(self):
@@ -85,7 +81,7 @@ class Test:
         n_y = 12
         n_tests = 200
 
-        assert self.run(3, n_tests, n_x, n_y)
+        self.run(3, n_tests, n_x, n_y)
 
 
     def test_10000_18_10groups(self):
@@ -93,7 +89,7 @@ class Test:
         n_y = 10
         n_tests = 10_000
 
-        assert self.run(4, n_tests, n_x, n_y)
+        self.run(4, n_tests, n_x, n_y)
 
 
     def test_20000_18_15groups(self):
@@ -101,7 +97,7 @@ class Test:
         n_y = 15
         n_tests = 20_000
 
-        assert self.run(5, n_tests, n_x, n_y)
+        self.run(5, n_tests, n_x, n_y)
 
 
     def test_30000_18_19groups(self):
@@ -109,7 +105,7 @@ class Test:
         n_y = 19
         n_tests = 30_000
 
-        assert self.run(6, n_tests, n_x, n_y)
+        self.run(6, n_tests, n_x, n_y)
 
 
     def test_input_not2d(self):

@@ -1,9 +1,12 @@
 import numpy as np
+import numba as nb
 # noinspection PyPackageRequirements
 import pytest
 from numpy.testing import assert_almost_equal, assert_equal, assert_allclose, assert_raises
+from scipy.stats import wilcoxon as scp_wilcoxon
 
 import permutations_stats.permutations as pm
+from permutations_stats.tests import wilcoxon
 
 # noinspection DuplicatedCode
 fd_array = np.array(
@@ -39,7 +42,7 @@ def test_correct_alternative():
 def test_repeated_permutations_simulation_override():
     array = np.arange(12).reshape((4, 3))
     res = pm.repeated_permutation_test(array)
-    res2 = pm.repeated_permutation_test(array, method="simulation", n_iter=1000)
+    res2 = pm.repeated_permutation_test(array, method="simulation", n_iter=10000)
     assert_equal(res[0], res2[0])
     assert_almost_equal(res[1], res2[1])
     assert_equal(res[2], res2[2])
@@ -79,3 +82,24 @@ def test_repeated_permutations_different_wo_seed():
 def test_repeated_permutations_not_array():
     with pytest.raises(TypeError):
         pm.repeated_permutation_test("this")
+
+
+@nb.njit()
+def wilcoxon_scp(x):
+    return wilcoxon.test(x, return_w=2)
+
+
+def test_compare_exact_wilcoxon_no_ties():
+    x = np.array([2, 4, 6, 7, 8, 9, 10 ,12 , 15])
+    y = np.array([5.1, 5.2, 6.3, 6.4, 8.5, 10.6, 11.7, 13.9, 11])
+    w_input = np.stack((x, y), axis=1)
+    # using scipy's statistic doesn't yield same pvalue on permutations
+    # So we compare separately
+    assert_allclose(
+        pm.repeated_permutation_test(w_input, test="wilcoxon")[1],
+        scp_wilcoxon(x, y, alternative="two-sided")[1]
+    )
+    assert_allclose(
+        pm.repeated_permutation_test(w_input, stat_func=wilcoxon_scp)[0],
+        scp_wilcoxon(x, y, alternative="two-sided")[0]
+    )

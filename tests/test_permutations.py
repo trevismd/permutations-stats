@@ -1,7 +1,9 @@
 import permutations_stats.permutations as pm
 import permutations_stats.utils as pmu
 import numpy as np
+import numba as nb
 from numpy.testing import assert_almost_equal, assert_equal, assert_allclose
+# noinspection PyPackageRequirements
 import pytest
 
 
@@ -120,6 +122,7 @@ def test_permutations_w_seed():
     rng = np.random.default_rng(seed=100)
     x = rng.random(5)
     y = rng.random(5)
+
     assert_allclose(
         pm.permutation_test(x, y, method="approximate", n_iter=100, seed=100),
         pm.permutation_test(x, y, method="approximate", n_iter=100, seed=100))
