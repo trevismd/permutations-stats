@@ -146,7 +146,7 @@ def num_to_array(value, n_values, n_elem):
     return pem
 
 
-@nb.njit()
+@nb.njit(parallel=True)
 def _all_dependent(array, n_comb, treatment_perms_ids, w, func, alternative):
     res_greater, res_smaller, res_equal = (0, 0, 0)
     new_array = np.empty_like(array)
@@ -253,7 +253,7 @@ def _compute_pval(res_greater, res_smaller, res_equal, n_comb, alternative):
     return pval
 
 
-@nb.njit()
+@nb.njit(parallel=True)
 def _get_counts(values, perm_ids, w, alternative, func):
     res_equal, res_greater, res_smaller = (0, 0, 0)
 
@@ -261,37 +261,6 @@ def _get_counts(values, perm_ids, w, alternative, func):
         new_x = np.take(values, perm_x_idx)
         new_y = np.delete(values, perm_x_idx)
         res_i = func(new_x, new_y)
-
-        if alternative == pmu.Alternative.TWO_SIDED:
-            res_i = abs(res_i)
-
-        if pmu.is_close(res_i, w):
-            res_equal += 1
-
-        elif res_i > w:
-            res_greater += 1
-
-        else:
-            res_smaller +=1
-
-    return res_greater, res_smaller, res_equal
-
-
-@nb.njit()
-def _get_counts_repeated(array, treatment_perms_ids, subj_perms_ids, w,
-                         alternative, func):
-
-    n_iter, n_subjects = subj_perms_ids.shape
-    res_equal, res_greater, res_smaller = (0, 0, 0)
-    new_array = np.empty_like(array)
-
-    for iter_idx, perm_x_idx in enumerate(subj_perms_ids):
-
-        for row_idx, val in range(perm_x_idx):
-            new_array[row_idx, :] = array[row_idx].take(
-                treatment_perms_ids[val])
-
-        res_i = func(new_array)
 
         if alternative == pmu.Alternative.TWO_SIDED:
             res_i = abs(res_i)
