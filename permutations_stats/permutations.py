@@ -115,33 +115,15 @@ def repeated_permutation_test(x: np.array, test="friedman",
 
     if method == pmu.Method.exact:
         n_comb = n_all_comb
-        subj_perms_ids = [perm_x_idx
-                          for perm_x_idx
-                          in itertools.product(
-                              range(len(treatment_perms_ids)),
-                              repeat=n_subjects)]
-        subj_perms_ids = np.array(subj_perms_ids, dtype=np.int32)
 
-        res_greater, res_smaller, res_equal = _get_counts_repeated(
-          x, treatment_perms_ids, subj_perms_ids, comp_w, alternative,
-          stat_func)
+        res_greater, res_smaller, res_equal = _all_dependent(
+            x, n_comb, treatment_perms_ids, comp_w, stat_func, alternative)
 
     else:
         n_comb = n_iter
 
-        if seed is not None:
-            random.seed(seed)
-
-        n_trt_perms = len(treatment_perms_ids)
-
-        subj_perms_ids = [[random.choice(range(n_trt_perms))
-                           for _ in range(n_subjects)]
-                          for _ in range(n_iter)]
-        subj_perms_ids = np.array(subj_perms_ids, dtype=np.int32)
-
-        res_greater, res_smaller, res_equal = _get_counts_repeated(
-            x, treatment_perms_ids, subj_perms_ids, comp_w, alternative,
-            stat_func)
+        res_greater, res_smaller, res_equal = _simulate_dependent(
+            x, treatment_perms_ids, n_iter, comp_w, stat_func, alternative, seed)
 
         # Be sure to have at least one possibility
         res_equal += 1
@@ -150,6 +132,82 @@ def repeated_permutation_test(x: np.array, test="friedman",
     pval = _compute_pval(res_greater, res_smaller, res_equal, n_comb, alternative)
 
     return w, pval, n_comb
+
+
+@nb.njit()
+def num_to_array(value, n_values, n_elem):
+    pem = np.zeros((n_elem,), dtype=np.int64)
+    for elem_idx in range(n_elem):
+        excess = value % (n_values ** (elem_idx + 1))
+        value -= excess
+        pem[-elem_idx-1] = excess / (n_values ** elem_idx)
+        if value == 0:
+            return pem
+    return pem
+
+
+@nb.njit()
+def _all_dependent(array, n_comb, treatment_perms_ids, w, func, alternative):
+    res_greater, res_smaller, res_equal = (0, 0, 0)
+    new_array = np.empty_like(array)
+    n_subjects = array.shape[0]
+    n_trt_perms = len(treatment_perms_ids)
+
+    # for subj_perms_ids in gen_values_n(n_trt_perms, n_subjects):
+    for value in range(n_comb):
+        subj_perms_ids = num_to_array(value, n_trt_perms, n_subjects)
+        for row_idx, val in enumerate(subj_perms_ids):
+            new_array[row_idx, :] = array[row_idx].take(treatment_perms_ids[val])
+
+        res_i = func(new_array)
+
+        if alternative == pmu.Alternative.TWO_SIDED:
+            res_i = abs(res_i)
+
+        if pmu.is_close(res_i, w):
+            res_equal += 1
+
+        elif res_i > w:
+            res_greater += 1
+
+        else:
+            res_smaller +=1
+
+    return res_greater, res_smaller, res_equal
+
+
+@nb.njit()
+def _simulate_dependent(array, treatment_perms_ids, n_iter, w,
+                        func, alternative, seed):
+    res_greater, res_smaller, res_equal = (0, 0, 0)
+    new_array = np.empty_like(array)
+    n_subjects = array.shape[0]
+    n_trt_perms = len(treatment_perms_ids)
+
+    if seed is not None:
+        np.random.seed(seed)
+
+    for _ in range(n_iter):
+        subj_perms_ids = np.random.choice(n_trt_perms, n_subjects, replace=True)
+
+        for row_idx, val in enumerate(subj_perms_ids):
+            new_array[row_idx, :] = array[row_idx].take(treatment_perms_ids[val])
+
+        res_i = func(new_array)
+
+        if alternative == pmu.Alternative.TWO_SIDED:
+            res_i = abs(res_i)
+
+        if pmu.is_close(res_i, w):
+            res_equal += 1
+
+        elif res_i > w:
+            res_greater += 1
+
+        else:
+            res_smaller +=1
+
+    return res_greater, res_smaller, res_equal
 
 
 def _check_and_get(test, alternative, stat_func, method):
@@ -196,49 +254,58 @@ def _compute_pval(res_greater, res_smaller, res_equal, n_comb, alternative):
 
 
 @nb.njit()
-def _counts(res, w):
-    close = pmu.is_close(res, w)
-    res_equal = np.sum(close)
-    res_greater = np.sum(res[~close] > w)
-    res_smaller = np.sum(res[~close] < w)
+def _get_counts(values, perm_ids, w, alternative, func):
+    res_equal, res_greater, res_smaller = (0, 0, 0)
+
+    for i, perm_x_idx in enumerate(perm_ids):
+        new_x = np.take(values, perm_x_idx)
+        new_y = np.delete(values, perm_x_idx)
+        res_i = func(new_x, new_y)
+
+        if alternative == pmu.Alternative.TWO_SIDED:
+            res_i = abs(res_i)
+
+        if pmu.is_close(res_i, w):
+            res_equal += 1
+
+        elif res_i > w:
+            res_greater += 1
+
+        else:
+            res_smaller +=1
 
     return res_greater, res_smaller, res_equal
 
 
 @nb.njit()
-def _get_counts(values, perm_ids, w, alternative, func):
-    res = np.empty(len(perm_ids), dtype=np.float64)
-
-    for i, perm_x_idx in enumerate(perm_ids):
-        new_x = np.take(values, perm_x_idx)
-        new_y = np.delete(values, perm_x_idx)
-        res[i] = func(new_x, new_y)
-
-    if alternative == pmu.Alternative.TWO_SIDED:
-        res = np.abs(res)
-
-    return _counts(res, w)
-
-
-@nb.njit()
 def _get_counts_repeated(array, treatment_perms_ids, subj_perms_ids, w,
                          alternative, func):
-    n_iter, n_subjects = subj_perms_ids.shape
 
-    res = np.empty(n_iter, dtype=np.float64)
+    n_iter, n_subjects = subj_perms_ids.shape
+    res_equal, res_greater, res_smaller = (0, 0, 0)
+    new_array = np.empty_like(array)
+
     for iter_idx, perm_x_idx in enumerate(subj_perms_ids):
 
-        new_array = np.empty_like(array)
-        for row_idx in range(n_subjects):
+        for row_idx, val in range(perm_x_idx):
             new_array[row_idx, :] = array[row_idx].take(
-                treatment_perms_ids[perm_x_idx[row_idx]])
+                treatment_perms_ids[val])
 
-        res[iter_idx] = func(new_array)
+        res_i = func(new_array)
 
-    if alternative == pmu.Alternative.TWO_SIDED:
-        res = np.abs(res)
+        if alternative == pmu.Alternative.TWO_SIDED:
+            res_i = abs(res_i)
 
-    return _counts(res, w)
+        if pmu.is_close(res_i, w):
+            res_equal += 1
+
+        elif res_i > w:
+            res_greater += 1
+
+        else:
+            res_smaller +=1
+
+    return res_greater, res_smaller, res_equal
 
 
 def _check_method(n_iter, n_all_comb, method, force_simulations):

@@ -22,11 +22,11 @@ class Test:
 
         assert_almost_equal(mean, mean_e)
 
-        assert_allclose(lower, lower_e, atol=2e-4)
-        assert_allclose(upper, upper_e, atol=2e-4)
+        assert_allclose(lower, lower_e, atol=1e-3)
+        assert_allclose(upper, upper_e, atol=1e-3)
 
-        assert_allclose(lower_p, lower, atol=2e-4)
-        assert_allclose(upper_p, upper, atol=2e-4)
+        assert_allclose(lower_p, lower, atol=1e-3)
+        assert_allclose(upper_p, upper, atol=1e-3)
 
     def test_confidence_interval_median_pll(self):
         rng = np.random.default_rng(seed=2020)

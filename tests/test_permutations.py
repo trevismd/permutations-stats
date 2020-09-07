@@ -79,14 +79,6 @@ def test_correct_test_param_type():
         pm.permutation_test(x, y, test=np.mean)
 
 
-def test_counts():
-    array = np.array([1, 2, 3, 4])
-    res_greater, res_smaller, res_equal = pm._counts(array, 2)
-    assert_equal(res_greater, 2)
-    assert_equal(res_equal, 1)
-    assert_equal(res_smaller, 1)
-
-
 def test_permutation_test_not_array_like():
     with pytest.raises(TypeError):
         pm.permutation_test("avcd", [1, 2, 3])
