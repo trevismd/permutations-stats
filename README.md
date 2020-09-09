@@ -19,13 +19,13 @@ made about the data (such as normality) or if the sample is not large enough, th
 existing implementations should not be used.  
 For example, the Brunner Munzel [1] test is implemented in `scipy` but not with
 an exact calculation. The statistic can be used with the public API but it can
-take some time if ran several thousands of times (e.g. the p-value is also calculated for each
-iteration).  
+take some time if ran several thousands of times (e.g. the p-value is also 
+calculated for each iteration).  
 
 This packages reimplements the looping of permutations and statistical tests
-with `numba`. A few seconds are required to compile on the fly for the first function call.  
-Then, acceleration is critical as shown in this output from tests comparing the
-Brunner Munzel statistic calculation with `scipy`:
+with `numba`. A few seconds are required to compile on the fly for the first 
+function call. Then, acceleration is critical as shown in this output from 
+tests comparing the Brunner Munzel statistic calculation with `scipy`:
 
 ```
 tests/stat_tests.py
@@ -97,6 +97,3 @@ If you find this software useful for your academic work, please cite ... TBD.
 > [4] Friedman, M. (1937). "The Use of Ranks to Avoid the Assumption of
 > Normality Implicit in the Analysis of Variance."
 > Journal of the American Statistical Association 32(200): 675-701.
-
-
-git commit -m "Fix repeated permutations, add wilcoxon"
