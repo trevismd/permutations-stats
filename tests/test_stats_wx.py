@@ -1,17 +1,18 @@
 import os
-import warnings
 from time import time
 
 import numba as nb
 import numpy as np
-from numpy.testing import assert_allclose
 # noinspection PyPackageRequirements
 import pytest
+from numpy.testing import assert_allclose
 # noinspection PyPackageRequirements
 from scipy.stats import wilcoxon as scp_wilcoxon
 
 from permutations_stats.tests import wilcoxon
 
+
+# noinspection DuplicatedCode
 class Test:
 
     def setup_class(self):
@@ -28,9 +29,6 @@ class Test:
         rng = np.random.default_rng(seed=n_tests*100 + n_x*10 + n_y)
         x = rng.random((n_tests, n_x))
         y = rng.random((n_tests, n_y)) + 0.02
-
-        ans_ps = np.empty((n_tests, 1))
-        ans_scp = np.empty((n_tests, 1))
 
         time_ps = 0
         time_scp = 0
@@ -59,7 +57,6 @@ class Test:
             speeds_file.write(f"{self.version};WX;{test_id};"
                               f"{self.ps_label};{time_ps};SCP;{time_scp};"
                               f"{time_scp - time_ps}\n")
-
 
     def test_100_5_5groups(self):
         n_x = 5
@@ -103,13 +100,14 @@ class Test:
 
         self.run(6, n_tests, n_x, n_y)
 
+    # noinspection PyTypeChecker
     def test_input_not1ds(self):
         rng = np.random.default_rng()
         x = rng.random((5, 5))
         y = rng.random((5, 5))
 
-        with pytest.raises(TypeError):
-            wilcoxon.test(np.stack(x, y), y)
+        with pytest.raises((TypeError, nb.TypingError)):
+            wilcoxon.test(np.stack((x, y)), y)
 
     # noinspection PyTypeChecker
     def test_input_not_numeric_array(self):

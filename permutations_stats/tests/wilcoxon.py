@@ -21,7 +21,7 @@ def test(x: np.ndarray, return_w=0):
     diffs = x[:, 1] - x[:, 0]
 
     signs = np.sign(diffs)
-    diffs  = np.abs(diffs)
+    diffs = np.abs(diffs)
 
     ranks = rank_1d(diffs)
     ranks = np.where(diffs > 1e-7, ranks, 0)

@@ -93,7 +93,7 @@ def repeated_permutation_test(x: np.array, test="friedman",
     try:
         x = x.astype(np.float64)
 
-    except:  # Must be simpliflied for numba support
+    except:  # Must be simplified for numba support
         raise TypeError("Please provide numeric valued numpy arrays (or -like, "
                         "np.array 1st argument) for x.")
 
@@ -146,15 +146,16 @@ def num_to_array(value, n_values, n_elem):
     return pem
 
 
+# noinspection DuplicatedCode
 @nb.njit(parallel=True)
 def _all_dependent(array, n_comb, treatment_perms_ids, w, func, alternative):
     res_greater, res_smaller, res_equal = (0, 0, 0)
-    new_array = np.empty_like(array)
     n_subjects = array.shape[0]
     n_trt_perms = len(treatment_perms_ids)
 
-    # for subj_perms_ids in gen_values_n(n_trt_perms, n_subjects):
-    for value in range(n_comb):
+    for value in nb.prange(n_comb):
+        new_array = np.empty_like(array)
+
         subj_perms_ids = num_to_array(value, n_trt_perms, n_subjects)
         for row_idx, val in enumerate(subj_perms_ids):
             new_array[row_idx, :] = array[row_idx].take(treatment_perms_ids[val])
@@ -171,11 +172,13 @@ def _all_dependent(array, n_comb, treatment_perms_ids, w, func, alternative):
             res_greater += 1
 
         else:
-            res_smaller +=1
+            res_smaller += 1
 
     return res_greater, res_smaller, res_equal
 
 
+# No parallel if seed is set so splitting of this function could be useful
+# noinspection DuplicatedCode
 @nb.njit()
 def _simulate_dependent(array, treatment_perms_ids, n_iter, w,
                         func, alternative, seed):
@@ -186,6 +189,7 @@ def _simulate_dependent(array, treatment_perms_ids, n_iter, w,
 
     if seed is not None:
         np.random.seed(seed)
+        print("Using seed", seed)
 
     for _ in range(n_iter):
         subj_perms_ids = np.random.choice(n_trt_perms, n_subjects, replace=True)
@@ -205,7 +209,7 @@ def _simulate_dependent(array, treatment_perms_ids, n_iter, w,
             res_greater += 1
 
         else:
-            res_smaller +=1
+            res_smaller += 1
 
     return res_greater, res_smaller, res_equal
 
@@ -257,7 +261,8 @@ def _compute_pval(res_greater, res_smaller, res_equal, n_comb, alternative):
 def _get_counts(values, perm_ids, w, alternative, func):
     res_equal, res_greater, res_smaller = (0, 0, 0)
 
-    for i, perm_x_idx in enumerate(perm_ids):
+    for i in nb.prange(len(perm_ids)):
+        perm_x_idx = perm_ids[i]
         new_x = np.take(values, perm_x_idx)
         new_y = np.delete(values, perm_x_idx)
         res_i = func(new_x, new_y)
@@ -272,7 +277,7 @@ def _get_counts(values, perm_ids, w, alternative, func):
             res_greater += 1
 
         else:
-            res_smaller +=1
+            res_smaller += 1
 
     return res_greater, res_smaller, res_equal
 

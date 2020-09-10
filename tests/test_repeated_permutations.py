@@ -1,8 +1,9 @@
-import numpy as np
 import numba as nb
+import numpy as np
 # noinspection PyPackageRequirements
 import pytest
-from numpy.testing import assert_almost_equal, assert_equal, assert_allclose, assert_raises
+from numpy.testing import assert_almost_equal, assert_equal, assert_allclose
+# noinspection PyPackageRequirements
 from scipy.stats import wilcoxon as scp_wilcoxon
 
 import permutations_stats.permutations as pm
@@ -59,24 +60,23 @@ def test_friedman_permutation():
     assert round(res[0], 1) == 40.1
 
 
-def test_repeated_permutations_w_seed():
+def test_repeated_permutations_w_seed(capsys):
     array = np.arange(12).reshape((4, 3))
+    a = pm.repeated_permutation_test(array, method="simulation", n_iter=20,
+                                     seed=100)[1]
+    captured = capsys.readouterr()
+    assert "Using seed" in captured.out
     assert_allclose(
-        pm.repeated_permutation_test(array, method="simulation", n_iter=20,
-                                     seed=100)[1],
+        a,
         pm.repeated_permutation_test(array, method="simulation", n_iter=20,
                                      seed=100)[1])
 
 
-def test_repeated_permutations_different_wo_seed():
-    array = np.arange(12).reshape((4, 3))
-    assert_raises(
-        AssertionError,
-        assert_allclose(
-            pm.repeated_permutation_test(array, method="simulation",
-                                         n_iter=20)[1],
-            pm.repeated_permutation_test(array, method="simulation",
-                                         n_iter=20)[1]))
+def test_repeated_permutations_no_seed(capsys):
+    array = np.repeat(np.arange(6).reshape((2, 3)), 2, axis=0)
+    pm.repeated_permutation_test(array, method="simulation", n_iter=20)
+    captured = capsys.readouterr()
+    assert "Using seed" not in captured.out
 
 
 def test_repeated_permutations_not_array():
@@ -90,16 +90,16 @@ def wilcoxon_scp(x):
 
 
 def test_compare_exact_wilcoxon_no_ties():
-    x = np.array([2, 4, 6, 7, 8, 9, 10 ,12 , 15])
+    x = np.array([2, 4, 6, 7, 8, 9, 10, 12, 15])
     y = np.array([5.1, 5.2, 6.3, 6.4, 8.5, 10.6, 11.7, 13.9, 11])
     w_input = np.stack((x, y), axis=1)
     # using scipy's statistic doesn't yield same pvalue on permutations
     # So we compare separately
     assert_allclose(
-        pm.repeated_permutation_test(w_input, test="wilcoxon")[1],
-        scp_wilcoxon(x, y, alternative="two-sided")[1]
-    )
-    assert_allclose(
         pm.repeated_permutation_test(w_input, stat_func=wilcoxon_scp)[0],
         scp_wilcoxon(x, y, alternative="two-sided")[0]
+    )
+    assert_allclose(
+        pm.repeated_permutation_test(w_input, test="wilcoxon")[1],
+        scp_wilcoxon(x, y, alternative="two-sided")[1]
     )
