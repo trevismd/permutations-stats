@@ -47,7 +47,7 @@ tests/stat_tests.py
 * [numba](https://numba.pydata.org/)
 
 And for development testing only
-* [scipy](https://www.scipy.org/)
+* [scipy](https://www.scipy.org/) &geq;1.5
 * [pytest](https://www.pytest.org/)
 
 ## Usage
@@ -97,6 +97,3 @@ If you find this software useful for your academic work, please cite ... TBD.
 > [4] Friedman, M. (1937). "The Use of Ranks to Avoid the Assumption of
 > Normality Implicit in the Analysis of Variance."
 > Journal of the American Statistical Association 32(200): 675-701.
-
-
-git commit -m "Fix repeated permutations, add wilcoxon"
