@@ -77,7 +77,7 @@ Thresholds for `numba` use will be better determined to decide the function to c
 (without user intervention).
 
 ## License
-GPL v.3 no later version.
+GNU General Public License v3.0 only.
 
 ## Cite
 If you find this software useful for your academic work, please cite ... TBD.

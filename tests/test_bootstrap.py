@@ -1,9 +1,10 @@
-import os
 import numpy as np
 from numpy.testing import assert_almost_equal, assert_allclose
+# noinspection PyProtectedMember
 from permutations_stats.bootstrap import bootstrap_mean, bootstrap_median, \
-    bootstrap_std, _bootstrap_numpy, _bootstrap_median_pll, _bootstrap_std_pll, \
+    bootstrap_std, _bootstrap_median_pll, _bootstrap_std_pll, \
     _bootstrap_mean_pll
+
 
 class Test:
 
@@ -66,14 +67,13 @@ class Test:
         a = np.arange(10)
         assert_almost_equal(bootstrap_mean(a, 95, 100, verbose=True)[0], 4.5)
 
-    def test_median_numba(self):
+    def test_mean_numba(self):
         a = np.arange(1000)
         assert_almost_equal(bootstrap_mean(a, 95, 100, verbose=True)[0], 499.5)
 
-    def test_median_numba(self):
+    def test_mean_numba(self):
         a = np.arange(1000)
         assert_almost_equal(bootstrap_mean(a, 95, 100, verbose=True)[0], 499.5)
-
 
     def test_mean_with_seed(self):
         a = np.arange(10)

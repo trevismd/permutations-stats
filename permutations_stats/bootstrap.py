@@ -1,6 +1,5 @@
-import os
-import numpy as np
 import numba as nb
+import numpy as np
 
 
 def bootstrap_mean(values, width=95, n_iter=1000, seed=0, nb_threshold=2e5,
@@ -27,6 +26,7 @@ def bootstrap_mean(values, width=95, n_iter=1000, seed=0, nb_threshold=2e5,
         print("Using numba")
 
     return _bootstrap_mean_pll(values, width, n_iter)
+
 
 def bootstrap_median(values, width=95, n_iter=1000, seed=0, nb_threshold=2e5,
                      verbose=False):
@@ -172,7 +172,6 @@ def _bootstrap_std_pll(values, width=95, n_iter=1000):
     """
     n_items = values.shape[0]
     results = np.empty(n_iter, dtype=np.float64)
-
 
     for iter_idx in range(n_iter):
         results[iter_idx] = np.std(

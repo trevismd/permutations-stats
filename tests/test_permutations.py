@@ -1,10 +1,10 @@
-import permutations_stats.permutations as pm
-import permutations_stats.utils as pmu
 import numpy as np
-import numba as nb
-from numpy.testing import assert_almost_equal, assert_equal, assert_allclose
 # noinspection PyPackageRequirements
 import pytest
+from numpy.testing import assert_almost_equal, assert_equal, assert_allclose
+
+import permutations_stats.permutations as pm
+import permutations_stats.utils as pmu
 
 
 def test_approximate_override():
