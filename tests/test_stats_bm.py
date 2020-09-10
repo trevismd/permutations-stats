@@ -11,6 +11,7 @@ from scipy.stats import brunnermunzel
 
 from permutations_stats.tests import brunner_munzel
 
+
 class Test:
 
     def setup_class(self):
@@ -63,14 +64,12 @@ class Test:
 
         return np.allclose(ans_ps, ans_scp)
 
-
     def test_100_5_4groups(self):
         n_x = 5
         n_y = 4
         n_tests = 200
 
         assert self.run(1, n_tests, n_x, n_y)
-
 
     def test_100_3_3groups(self):
         n_x = 3
@@ -79,14 +78,12 @@ class Test:
 
         assert self.run(2, n_tests, n_x, n_y)
 
-
     def test_20_10_12groups(self):
         n_x = 10
         n_y = 12
         n_tests = 200
 
         assert self.run(3, n_tests, n_x, n_y)
-
 
     def test_10000_18_10groups(self):
         n_x = 18
@@ -95,14 +92,12 @@ class Test:
 
         assert self.run(4, n_tests, n_x, n_y)
 
-
     def test_20000_18_15groups(self):
         n_x = 18
         n_y = 15
         n_tests = 20_000
 
         assert self.run(5, n_tests, n_x, n_y)
-
 
     def test_30000_18_19groups(self):
         n_x = 18
@@ -111,7 +106,6 @@ class Test:
 
         assert self.run(6, n_tests, n_x, n_y)
 
-
     def test_input_not2d(self):
         rng = np.random.default_rng()
         x = rng.random((5, 5))
@@ -119,7 +113,6 @@ class Test:
 
         with pytest.raises(TypeError):
             brunner_munzel.test(np.array([x, y], y))
-
 
     # noinspection PyTypeChecker
     def test_input_not_numeric_array(self):

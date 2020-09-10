@@ -11,6 +11,8 @@ from scipy.stats import mannwhitneyu
 
 from permutations_stats.tests import mann_whitney
 
+
+# noinspection DuplicatedCode
 class Test:
 
     def setup_class(self):
@@ -112,7 +114,7 @@ class Test:
         y = rng.random((5, 5))
 
         with pytest.raises(TypeError):
-            mann_whitney.test(np.stack(x, y), y)
+            mann_whitney.test(np.stack((x, y)), y)
 
     # noinspection PyTypeChecker
     def test_input_not_numeric_array(self):
