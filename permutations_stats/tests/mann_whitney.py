@@ -5,7 +5,7 @@ from permutations_stats.utils import rank_1d
 
 
 @nb.njit()
-def test(x: np.ndarray, y: np.ndarray):
+def both_u(x: np.ndarray, y: np.ndarray):
     # noinspection PyBroadException
     try:
         if len(x.shape) != 1 or len(y.shape) != 1:
@@ -21,6 +21,24 @@ def test(x: np.ndarray, y: np.ndarray):
     rank_sum_x = np.sum(ranks[:n_x])
 
     u = rank_sum_x - n_x * (n_x + 1) / 2.0
-    u = min(u, n_x * n_y - u)
+    us = (u, n_x * n_y - u)
 
-    return u
+    return us
+
+
+@nb.njit()
+def test(x: np.ndarray, y: np.ndarray):
+
+    return both_u(x, y)[0]
+
+
+@nb.njit()
+def min_u(x: np.ndarray, y: np.ndarray):
+
+    return min(both_u(x, y))
+
+
+@nb.njit()
+def max_u(x: np.ndarray, y: np.ndarray):
+
+    return max(both_u(x, y))

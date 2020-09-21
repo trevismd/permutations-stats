@@ -1,6 +1,7 @@
 import itertools
 import math
 import random
+from collections import namedtuple
 
 import numba as nb
 import numpy as np
@@ -22,6 +23,9 @@ METHODS = {"exact": pmu.Method.exact,
 
 
 TESTS = tests.TESTS
+permutation_result = namedtuple("PermutationsResults",
+                                ("statistic", "pvalue", "permutations",
+                                 "test", "alternative", "method"))
 
 
 def permutation_test(x: np.array, y: np.array, test="brunner_munzel",
@@ -49,7 +53,7 @@ def permutation_test(x: np.array, y: np.array, test="brunner_munzel",
 
     w = stat_func(x, y)
 
-    comp_w = abs(w) if alternative == pmu.Alternative.TWO_SIDED else w  # to be used for comparisons
+    comp_w = w
 
     n_all_comb = math.factorial(n_tot) // math.factorial(n_x) // math.factorial(n_y)
 
@@ -62,7 +66,7 @@ def permutation_test(x: np.array, y: np.array, test="brunner_munzel",
         perm_ids = np.array(perm_ids, dtype=np.int32)
 
         res_greater, res_smaller, res_equal = _get_counts(
-            all_values, perm_ids, comp_w, alternative, stat_func)
+            all_values, perm_ids, comp_w, stat_func)
 
     else:
         n_comb = n_iter
@@ -75,7 +79,7 @@ def permutation_test(x: np.array, y: np.array, test="brunner_munzel",
         perm_ids = np.array(perm_ids, dtype=np.int32)
 
         res_greater, res_smaller, res_equal = _get_counts(
-            all_values, perm_ids, comp_w, alternative, stat_func)
+            all_values, perm_ids, comp_w, stat_func)
 
         # Be sure to have at least one possibility
         res_equal += 1
@@ -83,7 +87,7 @@ def permutation_test(x: np.array, y: np.array, test="brunner_munzel",
 
     pval = _compute_pval(res_greater, res_smaller, res_equal, n_comb, alternative)
 
-    return w, pval, n_comb
+    return permutation_result(w, pval, n_comb, test, alternative.name, method.name)
 
 
 def repeated_permutation_test(x: np.array, test="friedman",
@@ -97,13 +101,16 @@ def repeated_permutation_test(x: np.array, test="friedman",
         raise TypeError("Please provide numeric valued numpy arrays (or -like, "
                         "np.array 1st argument) for x.")
 
+    if len(x.shape) != 2:
+        raise ValueError("Please provide a 2D array(-like) for x.")
+
     n_subjects, n_treatments = x.shape
     alternative, stat_func, method = _check_and_get(test, alternative, stat_func,
                                                     method)
     n_iter = int(n_iter)
 
     w = stat_func(x)
-    comp_w = abs(w) if alternative == pmu.Alternative.TWO_SIDED else w  # to be used for comparisons
+    comp_w = w  # to be used for comparisons
 
     n_all_comb = math.factorial(n_treatments) ** n_subjects
     method = _check_method(n_iter, n_all_comb, method, force_simulations)
@@ -117,13 +124,13 @@ def repeated_permutation_test(x: np.array, test="friedman",
         n_comb = n_all_comb
 
         res_greater, res_smaller, res_equal = _all_dependent(
-            x, n_comb, treatment_perms_ids, comp_w, stat_func, alternative)
+            x, n_comb, treatment_perms_ids, comp_w, stat_func)
 
     else:
         n_comb = n_iter
 
         res_greater, res_smaller, res_equal = _simulate_dependent(
-            x, treatment_perms_ids, n_iter, comp_w, stat_func, alternative, seed)
+            x, treatment_perms_ids, n_iter, comp_w, stat_func, seed)
 
         # Be sure to have at least one possibility
         res_equal += 1
@@ -131,7 +138,7 @@ def repeated_permutation_test(x: np.array, test="friedman",
 
     pval = _compute_pval(res_greater, res_smaller, res_equal, n_comb, alternative)
 
-    return w, pval, n_comb
+    return permutation_result(w, pval, n_comb, test, alternative.name, method.name)
 
 
 @nb.njit()
@@ -148,7 +155,7 @@ def num_to_array(value, n_values, n_elem):
 
 # noinspection DuplicatedCode
 @nb.njit(parallel=True)
-def _all_dependent(array, n_comb, treatment_perms_ids, w, func, alternative):
+def _all_dependent(array, n_comb, treatment_perms_ids, w, func):
     res_greater, res_smaller, res_equal = (0, 0, 0)
     n_subjects = array.shape[0]
     n_trt_perms = len(treatment_perms_ids)
@@ -161,9 +168,6 @@ def _all_dependent(array, n_comb, treatment_perms_ids, w, func, alternative):
             new_array[row_idx, :] = array[row_idx].take(treatment_perms_ids[val])
 
         res_i = func(new_array)
-
-        if alternative == pmu.Alternative.TWO_SIDED:
-            res_i = abs(res_i)
 
         if pmu.is_close(res_i, w):
             res_equal += 1
@@ -181,7 +185,7 @@ def _all_dependent(array, n_comb, treatment_perms_ids, w, func, alternative):
 # noinspection DuplicatedCode
 @nb.njit()
 def _simulate_dependent(array, treatment_perms_ids, n_iter, w,
-                        func, alternative, seed):
+                        func, seed):
     res_greater, res_smaller, res_equal = (0, 0, 0)
     new_array = np.empty_like(array)
     n_subjects = array.shape[0]
@@ -198,9 +202,6 @@ def _simulate_dependent(array, treatment_perms_ids, n_iter, w,
             new_array[row_idx, :] = array[row_idx].take(treatment_perms_ids[val])
 
         res_i = func(new_array)
-
-        if alternative == pmu.Alternative.TWO_SIDED:
-            res_i = abs(res_i)
 
         if pmu.is_close(res_i, w):
             res_equal += 1
@@ -226,10 +227,12 @@ def _check_and_get(test, alternative, stat_func, method):
     if stat_func is None:
         if not isinstance(test, str):
             raise TypeError(f"`test` parameter must be a string")
+        stat_func_dict = TESTS.get(test, None)
 
-        stat_func = TESTS.get(test, None)
+        if stat_func_dict is not None:
+            stat_func = stat_func_dict.get(alternative, None)
 
-        if stat_func is None:
+        if stat_func_dict is None or stat_func is None:
             raise ValueError(f"Incorrect `test` name specified, "
                              f"must be one of {list(TESTS.keys())} "
                              f"or a function must be passed as `stat_func`")
@@ -258,7 +261,7 @@ def _compute_pval(res_greater, res_smaller, res_equal, n_comb, alternative):
 
 
 @nb.njit(parallel=True)
-def _get_counts(values, perm_ids, w, alternative, func):
+def _get_counts(values, perm_ids, w, func):
     res_equal, res_greater, res_smaller = (0, 0, 0)
 
     for i in nb.prange(len(perm_ids)):
@@ -266,9 +269,6 @@ def _get_counts(values, perm_ids, w, alternative, func):
         new_x = np.take(values, perm_x_idx)
         new_y = np.delete(values, perm_x_idx)
         res_i = func(new_x, new_y)
-
-        if alternative == pmu.Alternative.TWO_SIDED:
-            res_i = abs(res_i)
 
         if pmu.is_close(res_i, w):
             res_equal += 1

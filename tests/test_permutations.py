@@ -116,5 +116,5 @@ def test_permutations_w_seed():
     y = rng.random(5)
 
     assert_allclose(
-        pm.permutation_test(x, y, method="approximate", n_iter=100, seed=100),
-        pm.permutation_test(x, y, method="approximate", n_iter=100, seed=100))
+        pm.permutation_test(x, y, method="approximate", n_iter=100, seed=100)[:2],
+        pm.permutation_test(x, y, method="approximate", n_iter=100, seed=100)[:2])

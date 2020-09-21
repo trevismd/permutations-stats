@@ -1,3 +1,9 @@
+"""
+This implementation of Wilcoxon's signed rank test takes an input with shape
+(N, 2). When using a "greater" alternative, as in other packages, it means that
+the first dimension values are greater than the second.
+"""
+
 import numba as nb
 import numpy as np
 
@@ -18,7 +24,7 @@ def test(x: np.ndarray, return_w=0):
     except:
         raise TypeError("Please provide a numeric-valued 2D numpy array for x.")
 
-    diffs = x[:, 1] - x[:, 0]
+    diffs = x[:, 0] - x[:, 1]
 
     signs = np.sign(diffs)
     diffs = np.abs(diffs)
@@ -40,3 +46,8 @@ def test(x: np.ndarray, return_w=0):
         rank_sum = np.sum(ranks)
 
     return rank_sum
+
+
+@nb.njit()
+def abs_test(x: np.ndarray):
+    return np.abs(test(x))

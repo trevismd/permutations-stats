@@ -103,3 +103,35 @@ def test_compare_exact_wilcoxon_no_ties():
         pm.repeated_permutation_test(w_input, test="wilcoxon")[1],
         scp_wilcoxon(x, y, alternative="two-sided")[1]
     )
+
+
+def test_compare_exact_wilcoxon_no_ties_greater():
+    x = np.array([2, 4, 6, 7, 8, 9, 10, 12, 15])
+    y = np.array([5.1, 5.2, 6.3, 6.4, 8.5, 10.6, 11.7, 13.9, 11])
+    w_input = np.stack((x, y), axis=1)
+    # using scipy's statistic doesn't yield same pvalue on permutations
+    # So we compare separately
+    assert_allclose(
+        pm.repeated_permutation_test(w_input, stat_func=wilcoxon_scp, alternative="greater")[0],
+        scp_wilcoxon(x, y, alternative="greater")[0]
+    )
+    assert_allclose(
+        pm.repeated_permutation_test(w_input, test="wilcoxon", alternative="greater")[1],
+        scp_wilcoxon(x, y, alternative="greater")[1]
+    )
+
+
+def test_compare_exact_wilcoxon_no_ties_less():
+    x = np.array([2, 4, 6, 7, 8, 9, 10, 12, 15])
+    y = np.array([5.1, 5.2, 6.3, 6.4, 8.5, 10.6, 11.7, 13.9, 11])
+    w_input = np.stack((x, y), axis=1)
+    # using scipy's statistic doesn't yield same pvalue on permutations
+    # So we compare separately
+    assert_allclose(
+        pm.repeated_permutation_test(w_input, stat_func=wilcoxon_scp, alternative="less")[0],
+        scp_wilcoxon(x, y, alternative="less")[0]
+    )
+    assert_allclose(
+        pm.repeated_permutation_test(w_input, test="wilcoxon", alternative="less")[1],
+        scp_wilcoxon(x, y, alternative="less")[1]
+    )

@@ -39,7 +39,7 @@ def test(x: np.ndarray, y: np.ndarray):
     s2x = np.sum(np.power((r_diff_x - avg_ranks_x + (n_x + 1) / 2), 2)) / (n_x - 1)
     s2y = np.sum(np.power((r_diff_y - avg_ranks_y + (n_y + 1) / 2), 2)) / (n_y - 1)
 
-    v_n = n_tot * s2x / n_y + n_tot * s2y / n_x
+    v_n = n_tot * (s2x / n_y + s2y / n_x)
 
     if v_n == 0:
         return np.sign(p_hat) * np.inf
@@ -47,3 +47,8 @@ def test(x: np.ndarray, y: np.ndarray):
     tn = p_hat / math.sqrt(v_n) * math.sqrt(n_x * n_y / n_tot)
 
     return tn
+
+
+@nb.njit()
+def abs_test(x: np.ndarray, y: np.ndarray):
+    return np.abs(test(x, y))
