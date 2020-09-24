@@ -227,15 +227,18 @@ def _check_and_get(test, alternative, stat_func, method):
     if stat_func is None:
         if not isinstance(test, str):
             raise TypeError(f"`test` parameter must be a string")
-        stat_func_dict = TESTS.get(test, None)
+        stat_func_dicts = TESTS.get(test, None)
 
-        if stat_func_dict is not None:
-            stat_func = stat_func_dict.get(alternative, None)
+        if stat_func_dicts is not None:
+            stat_func_dict = stat_func_dicts.get(alternative, None)
 
-        if stat_func_dict is None or stat_func is None:
+        if stat_func_dicts is None or stat_func_dict is None:
             raise ValueError(f"Incorrect `test` name specified, "
                              f"must be one of {list(TESTS.keys())} "
                              f"or a function must be passed as `stat_func`")
+        else:
+            # todo:  evolve to return first and then
+            stat_func = stat_func_dict["then"]
 
     elif not callable(stat_func):
         raise TypeError("stat_func must be a callable object (function)")

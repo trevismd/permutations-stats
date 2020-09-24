@@ -21,7 +21,7 @@ def is_close(x, y):
     y_fin = np.isfinite(y)
 
     if x_fin and y_fin:
-        return np.abs((x - y)) < (1.e-8 + (1.e-5 * abs(y)))
+        return np.abs(x - y) < (1.e-8 + 1.e-5 * abs(y))
     else:
         return x_fin == y_fin
 
@@ -119,3 +119,7 @@ def np_mean(array, axis):
 @nb.njit
 def np_std(array, axis):
     return np_apply_along_axis(np.std, axis, array)
+
+@nb.njit
+def np_sum(array, axis):
+    return np_apply_along_axis(np.sum, axis, array)

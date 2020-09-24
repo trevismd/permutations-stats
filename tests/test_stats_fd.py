@@ -1,3 +1,4 @@
+import numba as nb
 import numpy as np
 # noinspection PyPackageRequirements
 import pytest
@@ -29,18 +30,19 @@ def test_statistic():
 
 def test_ties_correction(capsys):
     friedman.test(np.array([[1, 1, 3],
-                            [1, 2, 3]]))
+                            [1, 2, 3]]),
+                            verbose=True)
     captured = capsys.readouterr()
     assert captured.out == f"{friedman.CONOVER_APPLIED}\n"
 
 
 def test_input_not2d():
     # noinspection PyTypeChecker
-    with pytest.raises((NotImplementedError, TypeError)):
+    with pytest.raises((NotImplementedError, TypeError, nb.TypingError)):
         friedman.test(np.array([1, 2, 3]))
 
 
 # noinspection PyTypeChecker
 def test_input_not_numeric_array():
-    with pytest.raises(TypeError):
+    with pytest.raises((TypeError, nb.TypingError)):
         friedman.test("this")

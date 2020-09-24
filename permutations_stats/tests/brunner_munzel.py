@@ -52,3 +52,8 @@ def test(x: np.ndarray, y: np.ndarray):
 @nb.njit()
 def abs_test(x: np.ndarray, y: np.ndarray):
     return np.abs(test(x, y))
+
+
+@nb.njit()
+def invert_test(x: np.ndarray, y: np.ndarray):
+    return test(y, x)
