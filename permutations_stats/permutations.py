@@ -28,6 +28,47 @@ permutation_result = namedtuple("PermutationsResults",
                                  "test", "alternative", "method"))
 
 
+def friedman(array, rank=True):
+    n, k = array.shape
+    if rank:
+        new_array = pmu.simpler_ranks(array)
+    else:
+        new_array = array
+    critical_value = np.sum(np.square(np.sum(new_array, 0)))
+
+    tot = np.sum(new_array)
+    s_indices = [indices[:-1] for indices in itertools.permutations(range(k))]
+    fs_max_tot = n * k
+    fs = np.zeros([fs_max_tot for _ in range(k-1)])
+
+    row = new_array[0]
+    perm_values = row.take(s_indices)
+
+    for coords in perm_values:
+        fs[tuple(coords)] += 1
+
+    axes = tuple(range(k-1))
+
+    for i in range(1, n):
+        row = new_array[i]
+        perm_values = row.take(s_indices)
+        fs_new = np.zeros(fs.shape)
+        for perm_idx, coords in enumerate(perm_values):
+            fs_new += np.roll(fs, coords, axis=axes)
+        fs = fs_new
+
+    non_zero = np.nonzero(fs)
+    counts = np.empty((len(non_zero[0]), 2))
+
+    for val_idx, values in enumerate(zip(*non_zero)):
+        counts[val_idx] = fs[values], np.sum(np.square([*values,
+                                                        tot - np.sum(values)]))
+    tot_perms = np.sum(fs)
+
+    pvalue = np.sum(np.where(counts[:, 1] >= critical_value, counts[:, 0], 0)) / tot_perms
+    return pvalue
+
+
 def permutation_test(x: np.array, y: np.array, test="brunner_munzel",
                      stat_func_dict=None, alternative="two-sided", method="exact",
                      n_iter=1e4, force_simulations=False, seed=None):
@@ -112,14 +153,19 @@ def repeated_permutation_test(x: np.array, test="friedman",
     n_iter = int(n_iter)
 
     w, args = stat_func_first(x)
+    try:
+        transform = TESTS.get(test, None).get(alternative, None).get("transform", None)
+    except AttributeError:
+        transform = None
+
+    if transform is not None:
+        x = transform(x)
 
     comp_w = stat_func_then(x, args)  # to be used for comparisons
 
     n_all_comb = math.factorial(n_treatments) ** n_subjects
     method = _check_method(n_iter, n_all_comb, method, force_simulations)
-    treatment_perms_ids = [perm_x_idx
-                           for perm_x_idx
-                           in itertools.permutations(range(n_treatments))]
+    treatment_perms_ids = list(itertools.permutations(range(n_treatments)))
 
     treatment_perms_ids = np.array(treatment_perms_ids, dtype=np.int32)
 

@@ -7,6 +7,11 @@ CONOVER_APPLIED = "Conover correction for ties applied"
 
 
 @nb.njit()
+def transform(array):
+    return pmu.rank_2d_by_row(array)
+
+
+@nb.njit()
 def test(array: np.ndarray, t=1, verbose=False):
     """
     Subjects are array first dimension.
@@ -96,8 +101,7 @@ def _test(array: np.ndarray, t=1, verbose=False):
 
 @nb.njit()
 def test_faster(array: np.ndarray, tot):
-    ranked_data = pmu.rank_2d_by_row(array)
-    treatment_sums = pmu.np_sum(ranked_data[:, :-1], axis=0)
+    treatment_sums = pmu.np_sum(array[:, :-1], axis=0)
     sum_items = np.square(treatment_sums)
     q_stat = np.sum(sum_items, dtype=np.float64)
     q_stat = q_stat + np.square(tot - np.sum(treatment_sums))

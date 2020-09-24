@@ -87,6 +87,41 @@ def rank_1d(array):
     return ranks + 1
 
 
+def simpler_ranks_1d(array):
+    # Thanks Sven Mamach - https://stackoverflow.com/a/5284703
+    # and Martin F Thomsen - https://stackoverflow.com/a/20455974
+    """ Rank a 1d array, with averages of ties.
+    :param array: 1d numpy array
+    :returns: array whose values are replaced by their rank
+    """
+    temp = array.argsort()
+    ranks = np.empty_like(temp)
+    ranks[temp] = np.arange(len(array))
+    to_check = np.ones_like(array)
+    for i in range(len(array)):
+        if not to_check[i]:
+            continue
+        same = array == array[i]
+        same_count = np.sum(same)
+
+        if same_count > 1:
+            ranks_min = np.min(ranks[same])
+            ranks[same] = ranks_min
+
+            greater = array > array[i]
+            ranks[greater] -= same_count - 1
+            to_check[same] = False
+
+    return ranks
+
+
+def simpler_ranks(array):
+    new_array = np.empty_like(array)
+    for row_idx, row in enumerate(array):
+        new_array[row_idx] = simpler_ranks_1d(row)
+    return new_array.astype(np.int64)
+
+
 # This section is adapted from @joelrich
 # https://github.com/numba/numba/issues/1269#issuecomment-472574352
 @nb.njit
@@ -119,6 +154,7 @@ def np_mean(array, axis):
 @nb.njit
 def np_std(array, axis):
     return np_apply_along_axis(np.std, axis, array)
+
 
 @nb.njit
 def np_sum(array, axis):

@@ -4,6 +4,8 @@ import numpy as np
 import pytest
 
 from permutations_stats.tests import friedman
+from permutations_stats.permutations import friedman as friedman_fast
+from permutations_stats.permutations import repeated_permutation_test
 
 # noinspection DuplicatedCode
 fd_array = np.array(
@@ -23,15 +25,33 @@ fd_array = np.array(
      [6.00, 5.57, 22.23, 2.45, 6.24, 1.00, 4.00]])
 
 
+fd_array_2 = np.array([
+    [2, 2, 0],
+    [0, 2, 1],
+    [0, 4, 1],
+    [1, 3, 0],
+])
+
+
 def test_statistic():
     np.testing.assert_almost_equal(friedman.test(fd_array),
                                    40.1020408)
 
 
+def test_statistic_bis():
+    np.testing.assert_almost_equal(friedman_fast(fd_array_2, rank=False),
+                                   108/1296.)
+
+
+def test_statistic_ter():
+    np.testing.assert_almost_equal(repeated_permutation_test(fd_array_2)[1],
+                                   friedman_fast(fd_array_2))
+
+
 def test_ties_correction(capsys):
     friedman.test(np.array([[1, 1, 3],
                             [1, 2, 3]]),
-                            verbose=True)
+                  verbose=True)
     captured = capsys.readouterr()
     assert captured.out == f"{friedman.CONOVER_APPLIED}\n"
 

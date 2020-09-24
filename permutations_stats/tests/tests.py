@@ -16,17 +16,21 @@ TESTS = {"brunner_munzel": {
 
          "friedman": {
             pmu.Alternative.TWO_SIDED: {
+                "transform": friedman.transform,
                 "first": friedman._test,
                 "then": friedman.test_faster},
             pmu.Alternative.GREATER: {
+                "transform": friedman.transform,
                 "first": friedman._test,
                 "then": friedman.test_faster},
             pmu.Alternative.LESS: {
+                "transform": friedman.transform,
                 "first": friedman._test,
                 "then": friedman.test_faster}},
 
          "friedman_t2": {
             pmu.Alternative.TWO_SIDED: {
+                "transform": friedman.transform,
                 "first": friedman._test_t2,
                 "then": friedman.test_faster}},
 
