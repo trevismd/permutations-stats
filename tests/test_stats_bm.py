@@ -31,6 +31,9 @@ class Test:
         x = rng.random((n_tests, n_x))
         y = rng.random((n_tests, n_y)) + 0.02
 
+        # Compile once
+        brunner_munzel.test(x[0], y[0])
+
         time_ps = 0
         time_scp = 0
 

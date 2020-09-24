@@ -6,12 +6,33 @@ import permutations_stats.utils as pmu
 CONOVER_APPLIED = "Conover correction for ties applied"
 
 
+@nb.njit()
+def test(array: np.ndarray, verbose=False):
+    """
+    Subjects are array first dimension.
+    Treatments are the array second condition.
+    In case of ties Conover's statistic is calculated and T2 is returned instead
+    of T1.
+    :params array: Data in shape (n_subjects, n_treatments)
+    :return Friedman statistic
+    """
+    # noinspection PyBroadException
+    try:
+        if len(array.shape) != 2:
+            raise NotImplementedError("Input should be a 2D array.")
+
+    except:
+        raise TypeError("Please provide a numeric-valued 2D numpy arrays for x.")
+
+    return _test(array, verbose, )[0]
+
+
 # @nb.njit(['float64(float64[:, :])',
 #           'float64(float32[:, :])',
 #           'float64(int32[:, :])',
 #           'float64(int64[:, :])'])
 @nb.njit()
-def test(array: np.ndarray, verbose=False):
+def _test(array: np.ndarray, verbose=False):
     """
     Subjects are array first dimension.
     Treatments are the array second condition.
@@ -35,6 +56,7 @@ def test(array: np.ndarray, verbose=False):
     treatment_means = pmu.np_mean(ranked_data, axis=0)
     sum_items = np.square(treatment_means - 0.5 * (n_treatments + 1))
     q_stat = np.sum(sum_items, dtype=np.float64)
+    t = np.sum(ranked_data)
 
     for subj_idx in range(n_subjects):
         if len(np.unique(array[subj_idx, :])) != n_treatments:
@@ -56,24 +78,15 @@ def test(array: np.ndarray, verbose=False):
     else:
         q_stat *= 12 * n_subjects / (n_treatments * (n_treatments + 1))
 
-    return q_stat
+    return q_stat, t
 
 
 @nb.njit()
-def test_faster(array: np.ndarray, verbose=False):
-    """
-    Subjects are array first dimension.
-    Treatments are the array second condition.
-    In case of ties Conover's statistic is calculated and T2 is returned instead
-    of T1.
-    :params array: Data in shape (n_subjects, n_treatments)
-    :return Friedman statistic
-    """
-    # noinspection PyBroadException
-
+def test_faster(array: np.ndarray, t):
     ranked_data = pmu.rank_2d_by_row(array)
-    treatment_means = pmu.np_sum(ranked_data, axis=0)
-    sum_items = np.square(treatment_means)
+    treatment_sums = pmu.np_sum(ranked_data[:, :-1], axis=0)
+    sum_items = np.square(treatment_sums)
     q_stat = np.sum(sum_items, dtype=np.float64)
+    q_stat = q_stat + np.square(t - np.sum(treatment_sums))
 
     return q_stat

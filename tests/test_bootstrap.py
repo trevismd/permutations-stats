@@ -59,11 +59,11 @@ class Test:
 
         std_e = np.std(self.x)
 
-        assert_allclose(std, std_e, atol=2e-4)
-        assert_allclose(std_p, std_e, atol=2e-4)
+        assert_allclose(std, std_e, atol=3e-4)
+        assert_allclose(std_p, std_e, atol=3e-4)
 
-        assert_allclose(lower_p, lower, atol=2e-4)
-        assert_allclose(upper_p, upper, atol=2e-4)
+        assert_allclose(lower_p, lower, atol=3e-4)
+        assert_allclose(upper_p, upper, atol=3e-4)
 
     def test_mean(self):
         assert_almost_equal(bootstrap_mean(self.a, 95, 100, verbose=True)[0],

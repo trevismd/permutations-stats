@@ -8,7 +8,7 @@ __all__ = [
 ]
 
 __title__ = "Permutations-stats"
-__version__ = "0.1.6-alpha2"
+__version__ = "0.1.6-alpha3"
 __author__ = "Florian Charlier"
 __email__ = "florian.charlier@ulb.ac.be"
 __license__ = "GPL-3.0-only"

@@ -35,12 +35,15 @@ class Test:
 
         time_ps = 0
         time_scp = 0
+
+        # Compile once
+
         mann_whitney.min_u(x[0, :], y[0, :])
         for i in range(n_tests):
             x_i = x[i, :]
             y_i = y[i, :]
             t0 = time()
-            ans_ps = mann_whitney.min_u(x_i, y_i)
+            ans_ps = mann_whitney.min_u(x_i, y_i)[0]
             t1 = time()
 
             with warnings.catch_warnings():  # From scipy implementation

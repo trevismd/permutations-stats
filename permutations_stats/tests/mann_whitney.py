@@ -16,7 +16,14 @@ def both_u(x: np.ndarray, y: np.ndarray):
 
     n_x = len(x)
     n_y = len(y)
+    us = both_u_faster(x, y, (n_x, n_y))
 
+    return us, (n_x, n_y)
+
+
+@nb.njit()
+def both_u_faster(x: np.ndarray, y: np.ndarray, args):
+    n_x, n_y = args
     ranks = rank_1d(np.concatenate((x, y)))
     rank_sum_x = np.sum(ranks[:n_x])
 
@@ -28,17 +35,32 @@ def both_u(x: np.ndarray, y: np.ndarray):
 
 @nb.njit()
 def test(x: np.ndarray, y: np.ndarray):
+    data = both_u(x, y)
+    return data[0][0], data[1]
 
-    return both_u(x, y)[0]
+
+@nb.njit()
+def test_faster(x: np.ndarray, y: np.ndarray, args):
+    return both_u_faster(x, y, args)[0]
 
 
 @nb.njit()
 def min_u(x: np.ndarray, y: np.ndarray):
+    data = both_u(x, y)
+    return min(data[0]), data[1]
 
-    return min(both_u(x, y))
+
+@nb.njit()
+def min_u_faster(x: np.ndarray, y: np.ndarray, args):
+    return min(both_u_faster(x, y, args))
 
 
 @nb.njit()
 def max_u(x: np.ndarray, y: np.ndarray):
+    data = both_u(x, y)
+    return max(data[0], data[1])
 
-    return max(both_u(x, y))
+
+@nb.njit()
+def max_u_faster(x: np.ndarray, y: np.ndarray, args):
+    return max(both_u_faster(x, y, args))

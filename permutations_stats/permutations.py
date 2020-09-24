@@ -29,11 +29,11 @@ permutation_result = namedtuple("PermutationsResults",
 
 
 def permutation_test(x: np.array, y: np.array, test="brunner_munzel",
-                     stat_func=None, alternative="two-sided", method="exact",
+                     stat_func_dict=None, alternative="two-sided", method="exact",
                      n_iter=1e4, force_simulations=False, seed=None):
 
-    alternative, stat_func, method = _check_and_get(test, alternative, stat_func,
-                                                    method)
+    alternative, stat_func_first, stat_func_then, method = _check_and_get(
+        test, alternative, stat_func_dict, method)
 
     n_iter = int(n_iter)
 
@@ -51,9 +51,10 @@ def permutation_test(x: np.array, y: np.array, test="brunner_munzel",
     n_y = len(y)
     n_tot = n_x + n_y
 
-    w = stat_func(x, y)
+    w_and_params = stat_func_first(x, y)
+    w, args = w_and_params
 
-    comp_w = w
+    comp_w = stat_func_then(x, y, args)
 
     n_all_comb = math.factorial(n_tot) // math.factorial(n_x) // math.factorial(n_y)
 
@@ -66,7 +67,7 @@ def permutation_test(x: np.array, y: np.array, test="brunner_munzel",
         perm_ids = np.array(perm_ids, dtype=np.int32)
 
         res_greater, res_smaller, res_equal = _get_counts(
-            all_values, perm_ids, comp_w, stat_func)
+            all_values, perm_ids, comp_w, stat_func_then, args)
 
     else:
         n_comb = n_iter
@@ -79,7 +80,7 @@ def permutation_test(x: np.array, y: np.array, test="brunner_munzel",
         perm_ids = np.array(perm_ids, dtype=np.int32)
 
         res_greater, res_smaller, res_equal = _get_counts(
-            all_values, perm_ids, comp_w, stat_func)
+            all_values, perm_ids, comp_w, stat_func_then, args)
 
         # Be sure to have at least one possibility
         res_equal += 1
@@ -91,7 +92,7 @@ def permutation_test(x: np.array, y: np.array, test="brunner_munzel",
 
 
 def repeated_permutation_test(x: np.array, test="friedman",
-                              stat_func=None, alternative="two-sided",
+                              stat_func_dict=None, alternative="two-sided",
                               method="exact", n_iter=1e4,
                               force_simulations=False, seed=None):
     try:
@@ -105,12 +106,14 @@ def repeated_permutation_test(x: np.array, test="friedman",
         raise ValueError("Please provide a 2D array(-like) for x.")
 
     n_subjects, n_treatments = x.shape
-    alternative, stat_func, method = _check_and_get(test, alternative, stat_func,
-                                                    method)
+    alternative, stat_func_first, stat_func_then, method = _check_and_get(
+        test, alternative, stat_func_dict, method)
+
     n_iter = int(n_iter)
 
-    w = stat_func(x)
-    comp_w = w  # to be used for comparisons
+    w, args = stat_func_first(x)
+
+    comp_w = stat_func_then(x, args)  # to be used for comparisons
 
     n_all_comb = math.factorial(n_treatments) ** n_subjects
     method = _check_method(n_iter, n_all_comb, method, force_simulations)
@@ -124,13 +127,13 @@ def repeated_permutation_test(x: np.array, test="friedman",
         n_comb = n_all_comb
 
         res_greater, res_smaller, res_equal = _all_dependent(
-            x, n_comb, treatment_perms_ids, comp_w, stat_func)
+            x, n_comb, treatment_perms_ids, comp_w, stat_func_then, args)
 
     else:
         n_comb = n_iter
 
         res_greater, res_smaller, res_equal = _simulate_dependent(
-            x, treatment_perms_ids, n_iter, comp_w, stat_func, seed)
+            x, treatment_perms_ids, n_iter, comp_w, stat_func_then, args, seed)
 
         # Be sure to have at least one possibility
         res_equal += 1
@@ -155,7 +158,7 @@ def num_to_array(value, n_values, n_elem):
 
 # noinspection DuplicatedCode
 @nb.njit(parallel=True)
-def _all_dependent(array, n_comb, treatment_perms_ids, w, func):
+def _all_dependent(array, n_comb, treatment_perms_ids, w, func, args):
     res_greater, res_smaller, res_equal = (0, 0, 0)
     n_subjects = array.shape[0]
     n_trt_perms = len(treatment_perms_ids)
@@ -167,7 +170,7 @@ def _all_dependent(array, n_comb, treatment_perms_ids, w, func):
         for row_idx, val in enumerate(subj_perms_ids):
             new_array[row_idx, :] = array[row_idx].take(treatment_perms_ids[val])
 
-        res_i = func(new_array)
+        res_i = func(new_array, args)
 
         if pmu.is_close(res_i, w):
             res_equal += 1
@@ -185,7 +188,7 @@ def _all_dependent(array, n_comb, treatment_perms_ids, w, func):
 # noinspection DuplicatedCode
 @nb.njit()
 def _simulate_dependent(array, treatment_perms_ids, n_iter, w,
-                        func, seed):
+                        func, args, seed):
     res_greater, res_smaller, res_equal = (0, 0, 0)
     new_array = np.empty_like(array)
     n_subjects = array.shape[0]
@@ -201,7 +204,7 @@ def _simulate_dependent(array, treatment_perms_ids, n_iter, w,
         for row_idx, val in enumerate(subj_perms_ids):
             new_array[row_idx, :] = array[row_idx].take(treatment_perms_ids[val])
 
-        res_i = func(new_array)
+        res_i = func(new_array, args)
 
         if pmu.is_close(res_i, w):
             res_equal += 1
@@ -215,7 +218,7 @@ def _simulate_dependent(array, treatment_perms_ids, n_iter, w,
     return res_greater, res_smaller, res_equal
 
 
-def _check_and_get(test, alternative, stat_func, method):
+def _check_and_get(test, alternative, stat_func_dict, method):
     global ALTERNATIVES, TESTS
 
     alternative = ALTERNATIVES.get(alternative, None)
@@ -224,9 +227,10 @@ def _check_and_get(test, alternative, stat_func, method):
         raise ValueError(f"Incorrect `alternative` specified, "
                          f"must be one of {list(ALTERNATIVES.keys())}")
 
-    if stat_func is None:
+    if stat_func_dict is None:
         if not isinstance(test, str):
             raise TypeError(f"`test` parameter must be a string")
+
         stat_func_dicts = TESTS.get(test, None)
 
         if stat_func_dicts is not None:
@@ -237,11 +241,20 @@ def _check_and_get(test, alternative, stat_func, method):
                              f"must be one of {list(TESTS.keys())} "
                              f"or a function must be passed as `stat_func`")
         else:
-            # todo:  evolve to return first and then
-            stat_func = stat_func_dict["then"]
+            stat_func_first = stat_func_dict["first"]
+            stat_func_then = stat_func_dict["then"]
 
-    elif not callable(stat_func):
-        raise TypeError("stat_func must be a callable object (function)")
+    else:
+        try:
+            stat_func_first = stat_func_dict["first"]
+            stat_func_then = stat_func_dict["then"]
+
+        except IndexError:
+            raise IndexError("stat_func_dict expects a mapping of "
+                             "'first' and 'then' to callables.")
+
+        if not callable(stat_func_first) or not callable(stat_func_then):
+            raise TypeError("stat_func must be a callable object (function)")
 
     method = METHODS.get(method, None)
 
@@ -249,7 +262,7 @@ def _check_and_get(test, alternative, stat_func, method):
         raise ValueError(f"Incorrect computation method specified, "
                          f"must be in {list(METHODS.keys())}")
 
-    return alternative, stat_func, method
+    return alternative, stat_func_first, stat_func_then, method
 
 
 @nb.njit()
@@ -264,14 +277,14 @@ def _compute_pval(res_greater, res_smaller, res_equal, n_comb, alternative):
 
 
 @nb.njit(parallel=True)
-def _get_counts(values, perm_ids, w, func):
+def _get_counts(values, perm_ids, w, func, args):
     res_equal, res_greater, res_smaller = (0, 0, 0)
 
     for i in nb.prange(len(perm_ids)):
         perm_x_idx = perm_ids[i]
         new_x = np.take(values, perm_x_idx)
         new_y = np.delete(values, perm_x_idx)
-        res_i = func(new_x, new_y)
+        res_i = func(new_x, new_y, args)
 
         if pmu.is_close(res_i, w):
             res_equal += 1

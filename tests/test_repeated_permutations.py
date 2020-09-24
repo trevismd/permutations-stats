@@ -85,8 +85,15 @@ def test_repeated_permutations_not_array():
 
 
 @nb.njit()
-def wilcoxon_scp(x):
-    return wilcoxon.test(x, return_w=2)
+def wilcoxon_scp(x, return_w=2.):
+    # noinspection PyProtectedMember
+    return wilcoxon._test(x, return_w)
+
+
+@nb.njit()
+def wilcoxon_scp_faster(x, return_w=2.):
+    # noinspection PyProtectedMember
+    return wilcoxon._test_faster(x, return_w)
 
 
 def test_compare_exact_wilcoxon_no_ties():
@@ -95,8 +102,9 @@ def test_compare_exact_wilcoxon_no_ties():
     w_input = np.stack((x, y), axis=1)
     # using scipy's statistic doesn't yield same pvalue on permutations
     # So we compare separately
+    wilcoxon_scp_dict = {"first": wilcoxon_scp, "then": wilcoxon_scp_faster}
     assert_allclose(
-        pm.repeated_permutation_test(w_input, stat_func=wilcoxon_scp)[0],
+        pm.repeated_permutation_test(w_input, stat_func_dict=wilcoxon_scp_dict)[0],
         scp_wilcoxon(x, y, alternative="two-sided")[0]
     )
     assert_allclose(
@@ -111,8 +119,10 @@ def test_compare_exact_wilcoxon_no_ties_greater():
     w_input = np.stack((x, y), axis=1)
     # using scipy's statistic doesn't yield same pvalue on permutations
     # So we compare separately
+    wilcoxon_scp_dict = {"first": wilcoxon_scp, "then": wilcoxon_scp_faster}
     assert_allclose(
-        pm.repeated_permutation_test(w_input, stat_func=wilcoxon_scp, alternative="greater")[0],
+        pm.repeated_permutation_test(
+            w_input, stat_func_dict=wilcoxon_scp_dict, alternative="greater")[0],
         scp_wilcoxon(x, y, alternative="greater")[0]
     )
     assert_allclose(
@@ -127,8 +137,9 @@ def test_compare_exact_wilcoxon_no_ties_less():
     w_input = np.stack((x, y), axis=1)
     # using scipy's statistic doesn't yield same pvalue on permutations
     # So we compare separately
+    wilcoxon_scp_dict = {"first": wilcoxon_scp, "then": wilcoxon_scp_faster}
     assert_allclose(
-        pm.repeated_permutation_test(w_input, stat_func=wilcoxon_scp, alternative="less")[0],
+        pm.repeated_permutation_test(w_input, stat_func_dict=wilcoxon_scp_dict, alternative="less")[0],
         scp_wilcoxon(x, y, alternative="less")[0]
     )
     assert_allclose(
