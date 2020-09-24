@@ -25,6 +25,11 @@ TESTS = {"brunner_munzel": {
                 "first": friedman._test,
                 "then": friedman.test_faster}},
 
+         "friedman_t2": {
+            pmu.Alternative.TWO_SIDED: {
+                "first": friedman._test_t2,
+                "then": friedman.test_faster}},
+
          "mann_whitney": {
             pmu.Alternative.TWO_SIDED: {
                 "first": mann_whitney.test,
