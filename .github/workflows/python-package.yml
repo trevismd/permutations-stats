@@ -38,7 +38,7 @@ jobs:
     - name: Test with pytest (JIT disabled)
       run: |
         export NUMBA_DISABLE_JIT=1
-        coverage run --source permutation_stats -m pytest ./tests -v
+        coverage run -m pytest ./tests -v
         unset NUMBA_DISABLE_JIT
         coverage report -m
     - name: Upload Coverage to Codecov
