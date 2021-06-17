@@ -1,6 +1,7 @@
 import itertools
 import math
 import random
+import warnings
 from collections import namedtuple
 
 import numba as nb
@@ -65,13 +66,16 @@ def friedman(array, rank=True):
                                                         tot - np.sum(values)]))
     tot_perms = np.sum(fs)
 
-    pvalue = np.sum(np.where(counts[:, 1] >= critical_value, counts[:, 0], 0)) / tot_perms
+    pvalue = (np.sum(np.where(counts[:, 1] >= critical_value, counts[:, 0], 0))
+              / tot_perms)
+
     return pvalue
 
 
 def permutation_test(x: np.array, y: np.array, test="brunner_munzel",
-                     stat_func_dict=None, alternative="two-sided", method="exact",
-                     n_iter=1e4, force_simulations=False, seed=None):
+                     stat_func_dict=None, alternative="two-sided",
+                     method="exact", n_iter=1e4, force_simulations=False,
+                     seed=None) -> permutation_result:
 
     alternative, stat_func_first, stat_func_then, method = _check_and_get(
         test, alternative, stat_func_dict, method)
@@ -97,14 +101,18 @@ def permutation_test(x: np.array, y: np.array, test="brunner_munzel",
 
     comp_w = stat_func_then(x, y, args)
 
-    n_all_comb = math.factorial(n_tot) // math.factorial(n_x) // math.factorial(n_y)
+    n_all_comb = (math.factorial(n_tot)
+                  // math.factorial(n_x)
+                  // math.factorial(n_y))
 
     method = _check_method(n_iter, n_all_comb, method, force_simulations)
 
     if method == pmu.Method.exact:
         n_comb = n_all_comb
         perm_ids = [perm_x_idx
-                    for perm_x_idx in itertools.combinations(range(n_tot), n_x)]
+                    for perm_x_idx
+                    in itertools.combinations(range(n_tot), n_x)]
+
         perm_ids = np.array(perm_ids, dtype=np.int32)
 
         res_greater, res_smaller, res_equal = _get_counts(
@@ -127,9 +135,11 @@ def permutation_test(x: np.array, y: np.array, test="brunner_munzel",
         res_equal += 1
         n_comb += 1
 
-    pval = _compute_pval(res_greater, res_smaller, res_equal, n_comb, alternative)
+    pval = _compute_pval(
+        res_greater, res_smaller, res_equal, n_comb, alternative)
 
-    return permutation_result(w, pval, n_comb, test, alternative.name, method.name)
+    return permutation_result(
+        w, pval, n_comb, test, alternative.name, method.name)
 
 
 def repeated_permutation_test(x: np.array, test="friedman",
@@ -139,9 +149,9 @@ def repeated_permutation_test(x: np.array, test="friedman",
     try:
         x = x.astype(np.float64)
 
-    except:  # Must be simplified for numba support
-        raise TypeError("Please provide numeric valued numpy arrays (or -like, "
-                        "np.array 1st argument) for x.")
+    except:  # Must be simplified for numba support  # noqa: E722
+        raise TypeError("Please provide numeric valued numpy arrays (or "
+                        "-like, np.array 1st argument) for x.")
 
     if len(x.shape) != 2:
         raise ValueError("Please provide a 2D array(-like) for x.")
@@ -154,7 +164,10 @@ def repeated_permutation_test(x: np.array, test="friedman",
 
     w, args = stat_func_first(x)
     try:
-        transform = TESTS.get(test, None).get(alternative, None).get("transform", None)
+        transform = (
+            TESTS.get(test, None).get(alternative, None).get("transform", None)
+        )
+
     except AttributeError:
         transform = None
 
@@ -185,9 +198,11 @@ def repeated_permutation_test(x: np.array, test="friedman",
         res_equal += 1
         n_comb += 1
 
-    pval = _compute_pval(res_greater, res_smaller, res_equal, n_comb, alternative)
+    pval = _compute_pval(
+        res_greater, res_smaller, res_equal, n_comb, alternative)
 
-    return permutation_result(w, pval, n_comb, test, alternative.name, method.name)
+    return permutation_result(
+        w, pval, n_comb, test, alternative.name, method.name)
 
 
 @nb.njit()
@@ -214,7 +229,8 @@ def _all_dependent(array, n_comb, treatment_perms_ids, w, func, args):
 
         subj_perms_ids = num_to_array(value, n_trt_perms, n_subjects)
         for row_idx, val in enumerate(subj_perms_ids):
-            new_array[row_idx, :] = array[row_idx].take(treatment_perms_ids[val])
+            new_array[row_idx, :] = array[row_idx].take(
+                treatment_perms_ids[val])
 
         res_i = func(new_array, args)
 
@@ -245,10 +261,12 @@ def _simulate_dependent(array, treatment_perms_ids, n_iter, w,
         print("Using seed", seed)
 
     for _ in range(n_iter):
-        subj_perms_ids = np.random.choice(n_trt_perms, n_subjects, replace=True)
+        subj_perms_ids = np.random.choice(
+            n_trt_perms, n_subjects, replace=True)
 
         for row_idx, val in enumerate(subj_perms_ids):
-            new_array[row_idx, :] = array[row_idx].take(treatment_perms_ids[val])
+            new_array[row_idx, :] = array[row_idx].take(
+                treatment_perms_ids[val])
 
         res_i = func(new_array, args)
 
@@ -275,7 +293,7 @@ def _check_and_get(test, alternative, stat_func_dict, method):
 
     if stat_func_dict is None:
         if not isinstance(test, str):
-            raise TypeError(f"`test` parameter must be a string")
+            raise TypeError("`test` parameter must be a string")
 
         stat_func_dicts = TESTS.get(test, None)
 
@@ -348,10 +366,11 @@ def _check_method(n_iter, n_all_comb, method, force_simulations):
     if n_iter + 1 >= n_all_comb and method == pmu.Method.simulation \
             and not force_simulations:
 
-        print(f"Simulation overridden by exact test because total number of "
-              f"combinations ({n_all_comb}) is smaller than asked amount of "
-              f"simulation iterations ({n_iter}).\n"
-              f"Pass `force_simulations=True` to avoid this behavior")
+        warnings.warn(
+            f"Simulation overridden by exact test because total number of "
+            f"combinations ({n_all_comb}) is smaller than asked amount of "
+            f"simulation iterations ({n_iter}).\n"
+            f"Pass `force_simulations=True` to avoid this behavior")
 
         method = pmu.Method.exact
     return method

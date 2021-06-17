@@ -86,8 +86,10 @@ class Test:
                             499.5)
 
     def test_median_with_seed(self):
-        assert_allclose(bootstrap_median(self.a, 95, 100, seed=20, verbose=True),
-                        bootstrap_median(self.a, 95, 100, seed=20, verbose=True))
+        assert_allclose(bootstrap_median(self.a, 95, 100, seed=20,
+                                         verbose=True),
+                        bootstrap_median(self.a, 95, 100, seed=20,
+                                         verbose=True))
 
     def test_std(self):
         assert_allclose(bootstrap_std(self.a, 95, 100, verbose=True)[0],

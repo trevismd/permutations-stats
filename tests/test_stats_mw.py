@@ -4,8 +4,7 @@ from time import time
 
 import numba as nb
 import numpy as np
-# noinspection PyPackageRequirements
-import PyNonpar as pNp
+
 # noinspection PyPackageRequirements
 import pytest
 from numpy.testing import assert_allclose

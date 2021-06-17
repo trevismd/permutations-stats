@@ -13,8 +13,9 @@ def test(x: np.ndarray, y: np.ndarray):
         if len(x.shape) != 1 or len(y.shape) != 1:
             raise TypeError("Input should be 1D arrays.")
 
-    except:
-        raise TypeError("Please provide a numeric-valued 1D numpy arrays for x and y.")
+    except:  # noqa: E722
+        raise TypeError(
+            "Please provide a numeric-valued 1D numpy arrays for x and y.")
 
     return _test(x, y)[0]
 
@@ -26,8 +27,9 @@ def _test(x: np.ndarray, y: np.ndarray):
         if len(x.shape) != 1 or len(y.shape) != 1:
             raise TypeError("Input should be 1D arrays.")
 
-    except:
-        raise TypeError("Please provide a numeric-valued 1D numpy arrays for x and y.")
+    except:  # noqa: E722
+        raise TypeError(
+            "Please provide a numeric-valued 1D numpy arrays for x and y.")
 
     n_x = len(x)
     n_y = len(y)
@@ -60,8 +62,10 @@ def _test_faster(x: np.ndarray, y: np.ndarray, args):
     r_diff_x = n_r_x - o_r_x
     r_diff_y = n_r_y - o_r_y
 
-    s2x = np.sum(np.power((r_diff_x - avg_ranks_x + (n_x + 1) / 2), 2)) / (n_x - 1)
-    s2y = np.sum(np.power((r_diff_y - avg_ranks_y + (n_y + 1) / 2), 2)) / (n_y - 1)
+    s2x = (np.sum(np.power((r_diff_x - avg_ranks_x + (n_x + 1) / 2), 2))
+           / (n_x - 1))
+    s2y = (np.sum(np.power((r_diff_y - avg_ranks_y + (n_y + 1) / 2), 2))
+           / (n_y - 1))
 
     v_n = n_tot * (s2x / n_y + s2y / n_x)
 

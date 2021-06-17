@@ -47,7 +47,7 @@ def rank_2d_by_col(array):
     n_arrays = array.shape[1]
     result = np.empty_like(array)
     for array_idx in range(n_arrays):
-        result[:, array_idx] = rank_1d(array[:,array_idx])
+        result[:, array_idx] = rank_1d(array[:, array_idx])
     return result
 
 

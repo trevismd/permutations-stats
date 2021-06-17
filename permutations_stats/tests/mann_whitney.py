@@ -11,8 +11,9 @@ def both_u(x: np.ndarray, y: np.ndarray):
         if len(x.shape) != 1 or len(y.shape) != 1:
             raise TypeError("Input should be 1D arrays.")
 
-    except:
-        raise TypeError("Please provide a numeric-valued 1D numpy arrays for x and y.")
+    except:  # noqa: E722
+        raise TypeError(
+            "Please provide a numeric-valued 1D numpy arrays for x and y.")
 
     n_x = len(x)
     n_y = len(y)

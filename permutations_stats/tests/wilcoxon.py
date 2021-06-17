@@ -22,8 +22,9 @@ def test(x: np.ndarray, return_w=0.):
             print(x.shape)
             raise TypeError("Input should be a (n, 2) array.")
 
-    except:
-        raise TypeError("Please provide a numeric-valued 2D numpy array for x.")
+    except:  # noqa: E722
+        raise TypeError(
+            "Please provide a numeric-valued 2D numpy array for x.")
 
     data = _test(x, return_w)
 
@@ -42,8 +43,9 @@ def _test(x: np.ndarray, return_w=0.):
             print(x.shape)
             raise TypeError("Input should be a (n, 2) array.")
 
-    except:
-        raise TypeError("Please provide a numeric-valued 2D numpy array for x.")
+    except:  # noqa: E722
+        raise TypeError(
+            "Please provide a numeric-valued 2D numpy array for x.")
 
     rank_sum = _test_faster(x, np.array([return_w]))
 

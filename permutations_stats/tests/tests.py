@@ -55,4 +55,4 @@ TESTS = {"brunner_munzel": {
             pmu.Alternative.LESS: {
                 "first": wilcoxon._test,
                 "then": wilcoxon._test_faster}}
-}
+         }

@@ -16,8 +16,8 @@ def test(array: np.ndarray, t=1, verbose=False):
     """
     Subjects are array first dimension.
     Treatments are the array second condition.
-    In case of ties Conover's statistic is calculated and T2 is returned instead
-    of T1.
+    In case of ties Conover's statistic is calculated and T2 is returned
+    instead of T1.
     :params array: Data in shape (n_subjects, n_treatments)
     :return Friedman statistic
     """
@@ -26,8 +26,9 @@ def test(array: np.ndarray, t=1, verbose=False):
         if len(array.shape) != 2:
             raise NotImplementedError("Input should be a 2D array.")
 
-    except:
-        raise TypeError("Please provide a numeric-valued 2D numpy arrays for x.")
+    except:  # noqa: E722
+        raise TypeError(
+            "Please provide a numeric-valued 2D numpy arrays for x.")
 
     return _test(array, t, verbose)[0]
 
@@ -51,9 +52,9 @@ def _test(array: np.ndarray, t=1, verbose=False):
     """
     Subjects are array first dimension.
     Treatments are the array second condition.
-    In case of ties Conover's statistic is calculated and T2 is returned instead
-    of T1.
-    :params array: Data in shape (n_subjects, n_treatments)
+    In case of ties Conover's statistic is calculated. Pass t=2 to return t2
+    :param array: Data in shape (n_subjects, n_treatments)
+    :param t: pass t=2 to return t2 in case of ties
     :return Friedman statistic
     """
     # noinspection PyBroadException
@@ -61,15 +62,17 @@ def _test(array: np.ndarray, t=1, verbose=False):
         if len(array.shape) != 2:
             raise NotImplementedError("Input should be a 2D array.")
 
-    except:
-        raise TypeError("Please provide a numeric-valued 2D numpy arrays for x.")
+    except:  # noqa: E722
+        raise TypeError(
+            "Please provide a numeric-valued 2D numpy arrays for x.")
 
     n_subjects = array.shape[0]
     n_treatments = array.shape[1]
 
     ranked_data = pmu.rank_2d_by_row(array)
     treatment_sums = pmu.np_sum(ranked_data, axis=0)
-    sum_items = np.square(treatment_sums - 0.5 * n_subjects * (n_treatments + 1))
+    sum_items = np.square(
+        treatment_sums - 0.5 * n_subjects * (n_treatments + 1))
     q_stat = np.sum(sum_items, dtype=np.float64)
     tot = np.sum(ranked_data)
 
