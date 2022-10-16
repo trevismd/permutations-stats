@@ -11,9 +11,10 @@ def test_approximate_override():
     rng = np.random.default_rng(seed=100)
     x = rng.random(5)
     y = rng.random(5)
-    assert_equal(
-        pm.permutation_test(x, y, method="approximate", n_iter=1000)[2],
-        252)
+    with pytest.warns(UserWarning):
+        assert_equal(
+            pm.permutation_test(x, y, method="approximate", n_iter=1000)[2],
+            252)
 
 
 def test_approximate_n_iter():
@@ -30,7 +31,8 @@ def test_approximate_p_val():
     x = rng.random(5)
     y = rng.random(5)
     assert_almost_equal(
-        pm.permutation_test(x, y, method="approximate", n_iter=100, seed=100)[1],
+        pm.permutation_test(x, y, method="approximate", n_iter=100,
+                            seed=100)[1],
         0.96039604)
 
 
@@ -58,7 +60,7 @@ def test_correct_func():
     y = rng.random(5)
 
     with pytest.raises(TypeError):
-        pm.permutation_test(x, y, stat_func="that one")
+        pm.permutation_test(x, y, stat_func_dict="that")
 
 
 def test_correct_test():
@@ -103,11 +105,14 @@ def test_valid_method():
 
 
 def test_override_method():
-    assert pm._check_method(100, 100, pmu.Method.simulation, False) == pmu.Method.exact
+    with pytest.warns(UserWarning):
+        assert (pm._check_method(100, 100, pmu.Method.simulation, False)
+                == pmu.Method.exact)
 
 
 def test_force_no_override_method():
-    assert pm._check_method(1000, 100, pmu.Method.simulation, True) == pmu.Method.simulation
+    assert (pm._check_method(1000, 100, pmu.Method.simulation, True)
+            == pmu.Method.simulation)
 
 
 def test_permutations_w_seed():
@@ -116,5 +121,7 @@ def test_permutations_w_seed():
     y = rng.random(5)
 
     assert_allclose(
-        pm.permutation_test(x, y, method="approximate", n_iter=100, seed=100),
-        pm.permutation_test(x, y, method="approximate", n_iter=100, seed=100))
+        pm.permutation_test(x, y, method="approximate", n_iter=100,
+                            seed=100)[:2],
+        pm.permutation_test(x, y, method="approximate", n_iter=100,
+                            seed=100)[:2])

@@ -1,4 +1,6 @@
-![coverage](.github/coverage.svg) [![Active Development](https://img.shields.io/badge/Maintenance%20Level-Actively%20Developed-brightgreen.svg)](https://gist.github.com/cheerfulstoic/d107229326a01ff0f333a1d3476e068d)
+![coverage](.github/coverage.svg)
+[![Active Development](https://img.shields.io/badge/Maintenance%20Level-Actively%20Developed-brightgreen.svg)](https://gist.github.com/cheerfulstoic/d107229326a01ff0f333a1d3476e068d)
+![Python](https://img.shields.io/badge/Python-3.7%2B-blue)
 # permutations-stats
 Python only permutation-based statistical tests, accelerated with numba.
 ## Status
@@ -58,17 +60,14 @@ from permutations_stats.permutations import permutation_test
 
 # Sample data
 x = np.arange(9)
-y = (np.arange(8) -0.2) * 1.1
-```
-Default parameters are exact Brunner Munzel test (two-sided)
+y = (np.arange(9) -0.2) * 1.1
 
-```python
-stat, pval, nb_iter_calc = permutation_test(x, y, test="brunner_munzel")
-stat, pval, nb_iter_calc
-# (-0.2776044311308564, 0.7475935828877005, 24310)
+permutation_test(x, y, test="brunner_munzel")
+# PermutationsResults(statistic=0.2776044311308564, pvalue=0.7475935828877005, permutations=24310, test='brunner_munzel', alternative='TWO_SIDED', method='exact')
 ```
 
-More on [usage.md](usage.md)
+More examples on [usage.ipynb](usage.ipynb) and a detailed demonstration on 
+[doc/demo.ipynb](doc/demo.ipynb).
 
 ## Perspective
 * If sample sizes and/or the number of iterations are small, acceleration is

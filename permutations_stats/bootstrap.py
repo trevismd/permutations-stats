@@ -58,8 +58,8 @@ def bootstrap_median(values, width=95, n_iter=1000, seed=0, nb_threshold=2e5,
 def bootstrap_std(values, width=95, n_iter=1000, seed=0, nb_threshold=2e5,
                   verbose=False):
     """
-    Resamples with replacement to provide a confidence interval for the standard
-    deviation.
+    Resamples with replacement to provide a confidence interval for the
+    standard deviation.
     np.std and np.percentiles are used with default parameters.
 
     :param values: 1D array
@@ -160,8 +160,8 @@ def _bootstrap_median_pll(values, width=95, n_iter=1000):
 @nb.njit(parallel=True)
 def _bootstrap_std_pll(values, width=95, n_iter=1000):
     """
-    Resamples with replacement to provide a confidence interval for the standard
-    deviation.
+    Resamples with replacement to provide a confidence interval for the
+    standard deviation.
     np.std and np.percentiles are used with default parameters.
 
     :param values: 1D array

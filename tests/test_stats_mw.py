@@ -4,6 +4,7 @@ from time import time
 
 import numba as nb
 import numpy as np
+
 # noinspection PyPackageRequirements
 import pytest
 from numpy.testing import assert_allclose
@@ -34,11 +35,14 @@ class Test:
         time_ps = 0
         time_scp = 0
 
+        # Compile once
+
+        mann_whitney.min_u(x[0, :], y[0, :])
         for i in range(n_tests):
             x_i = x[i, :]
             y_i = y[i, :]
             t0 = time()
-            ans_ps = mann_whitney.test(x_i, y_i)
+            ans_ps = mann_whitney.min_u(x_i, y_i)[0]
             t1 = time()
 
             with warnings.catch_warnings():  # From scipy implementation
@@ -52,9 +56,11 @@ class Test:
 
             time_ps += t1 - t0
             time_scp += t3 - t2
+
             if not np.isclose(ans_ps, ans_scp):
                 print(f"Fail at iteration {i} with data:\nx: {x_i}\ny: {y_i}"
                       f"with ans ps{ans_ps} and scp {ans_scp}")
+
             assert_allclose(ans_ps, ans_scp)
 
         print(f"{n_tests} tests with {n_x} and {n_y} data points - "

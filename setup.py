@@ -12,12 +12,12 @@ setup(
         'permutations_stats': 'permutations_stats',
         'permutations_stats.tests': 'permutations_stats/tests'
     },
-    python_requires='>3.6',
+    python_requires='>3.7',
     install_requires=["numpy", "numba"],
     packages=['permutations_stats', 'permutations_stats.tests'],
-    url='https://github.com/DarthTrevis/permutations-stats',
-    license='All rights reserved (at the moment)',
+    url='https://github.com/trevismd/permutations-stats',
+    license='GPL-3.0-only',
     author='Florian Charlier',
-    author_email='florian.charlier@bordet.be',
+    author_email='trevis@cascliniques.be',
     description='Permutation-based statistical tests in Python'
 )

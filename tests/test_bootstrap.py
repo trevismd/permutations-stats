@@ -59,11 +59,11 @@ class Test:
 
         std_e = np.std(self.x)
 
-        assert_allclose(std, std_e, atol=2e-4)
-        assert_allclose(std_p, std_e, atol=2e-4)
+        assert_allclose(std, std_e, atol=3e-4)
+        assert_allclose(std_p, std_e, atol=3e-4)
 
-        assert_allclose(lower_p, lower, atol=2e-4)
-        assert_allclose(upper_p, upper, atol=2e-4)
+        assert_allclose(lower_p, lower, atol=3e-4)
+        assert_allclose(upper_p, upper, atol=3e-4)
 
     def test_mean(self):
         assert_almost_equal(bootstrap_mean(self.a, 95, 100, verbose=True)[0],
@@ -86,8 +86,10 @@ class Test:
                             499.5)
 
     def test_median_with_seed(self):
-        assert_allclose(bootstrap_median(self.a, 95, 100, seed=20, verbose=True),
-                        bootstrap_median(self.a, 95, 100, seed=20, verbose=True))
+        assert_allclose(bootstrap_median(self.a, 95, 100, seed=20,
+                                         verbose=True),
+                        bootstrap_median(self.a, 95, 100, seed=20,
+                                         verbose=True))
 
     def test_std(self):
         assert_allclose(bootstrap_std(self.a, 95, 100, verbose=True)[0],

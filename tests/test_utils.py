@@ -5,7 +5,7 @@ from numpy.testing import assert_allclose
 
 from permutations_stats.utils import rank_1d, rank_2d, rank_2d_by_col, \
     rank_2d_by_row, is_close, np_mean, np_std
-from tests.test_stats_fd import fd_array
+from test_stats_fd import fd_array
 
 
 def test_simple_rank_1d():

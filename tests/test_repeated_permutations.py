@@ -43,7 +43,9 @@ def test_correct_alternative():
 def test_repeated_permutations_simulation_override():
     array = np.arange(12).reshape((4, 3))
     res = pm.repeated_permutation_test(array)
-    res2 = pm.repeated_permutation_test(array, method="simulation", n_iter=10000)
+    with pytest.warns(UserWarning):
+        res2 = pm.repeated_permutation_test(
+            array, method="simulation", n_iter=10000)
     assert_equal(res[0], res2[0])
     assert_almost_equal(res[1], res2[1])
     assert_equal(res[2], res2[2])
@@ -51,7 +53,8 @@ def test_repeated_permutations_simulation_override():
 
 def test_repeated_permutations_simulation_number():
     array = np.arange(12).reshape((4, 3))
-    res = pm.repeated_permutation_test(array, method="simulation", n_iter=100)
+    res = pm.repeated_permutation_test(
+        array, method="simulation", n_iter=100)
     assert_almost_equal(res[2], 101)
 
 
@@ -85,8 +88,15 @@ def test_repeated_permutations_not_array():
 
 
 @nb.njit()
-def wilcoxon_scp(x):
-    return wilcoxon.test(x, return_w=2)
+def wilcoxon_scp(x, return_w=2.):
+    # noinspection PyProtectedMember
+    return wilcoxon._test(x, return_w)
+
+
+@nb.njit()
+def wilcoxon_scp_faster(x, return_w=2.):
+    # noinspection PyProtectedMember
+    return wilcoxon._test_faster(x, return_w)
 
 
 def test_compare_exact_wilcoxon_no_ties():
@@ -95,11 +105,51 @@ def test_compare_exact_wilcoxon_no_ties():
     w_input = np.stack((x, y), axis=1)
     # using scipy's statistic doesn't yield same pvalue on permutations
     # So we compare separately
+    wilcoxon_scp_dict = {"first": wilcoxon_scp, "then": wilcoxon_scp_faster}
     assert_allclose(
-        pm.repeated_permutation_test(w_input, stat_func=wilcoxon_scp)[0],
+        pm.repeated_permutation_test(w_input,
+                                     stat_func_dict=wilcoxon_scp_dict)[0],
         scp_wilcoxon(x, y, alternative="two-sided")[0]
     )
     assert_allclose(
         pm.repeated_permutation_test(w_input, test="wilcoxon")[1],
         scp_wilcoxon(x, y, alternative="two-sided")[1]
+    )
+
+
+def test_compare_exact_wilcoxon_no_ties_greater():
+    x = np.array([2, 4, 6, 7, 8, 9, 10, 12, 15])
+    y = np.array([5.1, 5.2, 6.3, 6.4, 8.5, 10.6, 11.7, 13.9, 11])
+    w_input = np.stack((x, y), axis=1)
+    # using scipy's statistic doesn't yield same pvalue on permutations
+    # So we compare separately
+    wilcoxon_scp_dict = {"first": wilcoxon_scp, "then": wilcoxon_scp_faster}
+    assert_allclose(
+        pm.repeated_permutation_test(w_input, stat_func_dict=wilcoxon_scp_dict,
+                                     alternative="greater")[0],
+        scp_wilcoxon(x, y, alternative="greater")[0]
+    )
+    assert_allclose(
+        pm.repeated_permutation_test(w_input, test="wilcoxon",
+                                     alternative="greater")[1],
+        scp_wilcoxon(x, y, alternative="greater")[1]
+    )
+
+
+def test_compare_exact_wilcoxon_no_ties_less():
+    x = np.array([2, 4, 6, 7, 8, 9, 10, 12, 15])
+    y = np.array([5.1, 5.2, 6.3, 6.4, 8.5, 10.6, 11.7, 13.9, 11])
+    w_input = np.stack((x, y), axis=1)
+    # using scipy's statistic doesn't yield same pvalue on permutations
+    # So we compare separately
+    wilcoxon_scp_dict = {"first": wilcoxon_scp, "then": wilcoxon_scp_faster}
+    assert_allclose(
+        pm.repeated_permutation_test(w_input, stat_func_dict=wilcoxon_scp_dict,
+                                     alternative="less")[0],
+        scp_wilcoxon(x, y, alternative="less")[0]
+    )
+    assert_allclose(
+        pm.repeated_permutation_test(w_input, test="wilcoxon",
+                                     alternative="less")[1],
+        scp_wilcoxon(x, y, alternative="less")[1]
     )
