@@ -12,7 +12,7 @@ setup(
         'permutations_stats': 'permutations_stats',
         'permutations_stats.tests': 'permutations_stats/tests'
     },
-    python_requires='>3.7',
+    python_requires='>=3.7',
     install_requires=["numpy", "numba"],
     packages=['permutations_stats', 'permutations_stats.tests'],
     url='https://github.com/trevismd/permutations-stats',
