@@ -1,6 +1,8 @@
 ![coverage](.github/coverage.svg)
 [![Active Development](https://img.shields.io/badge/Maintenance%20Level-Actively%20Developed-brightgreen.svg)](https://gist.github.com/cheerfulstoic/d107229326a01ff0f333a1d3476e068d)
 ![Python](https://img.shields.io/badge/Python-3.7%2B-blue)
+[![DOI](https://zenodo.org/badge/288184471.svg)](https://zenodo.org/badge/latestdoi/288184471)
+
 # permutations-stats
 Python-only permutation-based statistical tests, accelerated with numba.
 ## Status
@@ -79,10 +81,15 @@ Thresholds for `numba` use will be better determined to decide the function to c
 GNU General Public License v3.0 only.
 
 ## Cite
-If you find this software useful for your academic work, please cite ... TBD.
+If you find this software useful for your academic work, please cite as below:
+
+```
+Florian Charlier. (2022). permutations-stats (v0.2). Zenodo. 
+https://doi.org/10.5281/zenodo.7213305
+```
 
 ## Acknowledgements
-We would like to thank Marianne Paesmans, Lieveke Ameye and Luigi Moretti at 
+We would like to thank Marianne Paesmans, Lieveke Ameye, and Luigi Moretti at 
 Institut Jules Bordet for their support during the development of this package.  
 
 ## References
