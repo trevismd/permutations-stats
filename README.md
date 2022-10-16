@@ -2,7 +2,7 @@
 [![Active Development](https://img.shields.io/badge/Maintenance%20Level-Actively%20Developed-brightgreen.svg)](https://gist.github.com/cheerfulstoic/d107229326a01ff0f333a1d3476e068d)
 ![Python](https://img.shields.io/badge/Python-3.7%2B-blue)
 # permutations-stats
-Python only permutation-based statistical tests, accelerated with numba.
+Python-only permutation-based statistical tests, accelerated with numba.
 ## Status
 ### Statistical tests
 Brunner Munzel [1], Mann Whitney Wilcoxon [2, 3], Wilcoxon signed rank test [3],
@@ -80,6 +80,10 @@ GNU General Public License v3.0 only.
 
 ## Cite
 If you find this software useful for your academic work, please cite ... TBD.
+
+## Acknowledgements
+We would like to thank Marianne Paesmans, Lieveke Ameye and Luigi Moretti at 
+Institut Jules Bordet for their support during the development of this package.  
 
 ## References
 > [1] Brunner, E. and Munzel, U. (2000), The Nonparametric Behrens‐Fisher
